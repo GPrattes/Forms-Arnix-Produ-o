@@ -96,10 +96,8 @@ async function loadDataAndRender() {
     }
   }
 
-  // Se a base ainda estiver vazia, gera a base de validação inicial com 87 respostas
-  if (!allResponses || allResponses.length === 0) {
-    allResponses = generateInitialValidationDataset();
-    localStorage.setItem('arnix_survey_responses', JSON.stringify(allResponses));
+  if (!allResponses) {
+    allResponses = [];
   }
 
   calculateAndRenderMetrics();
@@ -107,10 +105,50 @@ async function loadDataAndRender() {
   renderResponsesTable();
 }
 
+async function clearDatabase() {
+  if (!confirm('⚠️ ATENÇÃO: Deseja realmente apagar TODAS as respostas do banco de dados e zerar as métricas? Esta ação é irreversível.')) {
+    return;
+  }
+
+  const token = getAdminToken();
+  try {
+    const res = await fetch('/api/respostas', {
+      method: 'DELETE',
+      headers: {
+        'x-admin-key': token,
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    const data = await res.json();
+    alert(data.mensagem || 'Banco de dados limpo com sucesso!');
+  } catch (err) {
+    console.warn('Limpando cache local:', err);
+  }
+
+  localStorage.removeItem('arnix_survey_responses');
+  allResponses = [];
+  calculateAndRenderMetrics();
+  renderCharts();
+  renderResponsesTable();
+}
+window.clearDatabase = clearDatabase;
+
 /* ── 2. CÁLCULO DE MÉTRICAS & ARNIX VALIDATION SCORE (AVS) ─── */
 function calculateAndRenderMetrics() {
-  const total = allResponses.length;
-  if (total === 0) return;
+  const total = allResponses ? allResponses.length : 0;
+  
+  if (total === 0) {
+    updateMetricCard('totalRespondentes', '0');
+    updateMetricCard('avsScore', '0');
+    updateMetricCard('avsStatus', 'Aguardando Respostas');
+    updateMetricCard('pctProblema', '0%');
+    updateMetricCard('pctInteresse', '0%');
+    updateMetricCard('pctIntencaoUso', '0%');
+    updateMetricCard('pctDisposicaoPagamento', '0%');
+    updateMetricCard('precoMedio', 'R$ 0,00');
+    renderAVSGauge(0);
+    return;
+  }
 
   // 1. Problema (Frequência de dificuldade >= 3)
   const countProblema = allResponses.filter(r => r.frequencia_dificuldade >= 3).length;

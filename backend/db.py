@@ -348,3 +348,32 @@ def get_all_respostas() -> List[Dict[str, Any]]:
         print(f" [!] Erro ao listar do SQLite: {e}")
 
     return respostas
+
+def clear_all_respostas() -> int:
+    """Remove todas as respostas gravadas no banco de dados (Postgres ou SQLite)."""
+    deleted_count = 0
+    if IS_POSTGRES:
+        try:
+            conn = get_postgres_connection()
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM respostas_pesquisa;")
+            deleted_count = cursor.rowcount if cursor.rowcount != -1 else 0
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return deleted_count
+        except Exception as e:
+            print(f" [!] Erro ao limpar Postgres: {e}")
+
+    try:
+        conn = sqlite3.connect(SQLITE_DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM respostas_pesquisa;")
+        deleted_count = cursor.rowcount
+        conn.commit()
+        conn.close()
+        return deleted_count
+    except Exception as e:
+        print(f" [!] Erro ao limpar SQLite: {e}")
+
+    return deleted_count

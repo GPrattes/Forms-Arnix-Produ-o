@@ -34,7 +34,7 @@ if BACKEND_DIR not in sys.path:
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from db import insert_resposta, get_all_respostas
+from db import insert_resposta, get_all_respostas, clear_all_respostas
 
 app = FastAPI(
     title="ARNIX Research Serverless API (Enterprise Secured)",
@@ -188,6 +188,15 @@ async def criar_resposta_serverless(resposta: RespostaSurvey):
 @app.get("/respostas", dependencies=[Depends(verify_admin_token)])
 async def listar_respostas_serverless():
     return get_all_respostas()
+
+# ── 2.1 LIMPEZA TOTAL DO BANCO (🔒 EXCLUSIVO DO ADMINISTRADOR) ──
+@app.delete("/api/respostas", dependencies=[Depends(verify_admin_token)])
+@app.delete("/respostas", dependencies=[Depends(verify_admin_token)])
+@app.post("/api/admin/limpar-banco", dependencies=[Depends(verify_admin_token)])
+async def limpar_banco_serverless():
+    """Remove todas as respostas gravadas (Postgres ou SQLite)."""
+    count = clear_all_respostas()
+    return {"status": "sucesso", "removidos": count, "mensagem": f"Banco de dados limpo com sucesso! ({count} respostas removidas)"}
 
 # ── 3. MÉTRICAS ESTATÍSTICAS (🔒 EXCLUSIVO DO ADMINISTRADOR) ──
 @app.get("/api/metricas", dependencies=[Depends(verify_admin_token)])

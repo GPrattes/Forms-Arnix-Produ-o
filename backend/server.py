@@ -36,7 +36,7 @@ FRONTEND_DIR = os.path.join(FORMS_ROOT, "frontend")
 IMG_DIR = os.path.join(FRONTEND_DIR, "img")
 
 # Importa o driver de banco dual (Vercel Postgres / SQLite)
-from db import insert_resposta, get_all_respostas
+from db import insert_resposta, get_all_respostas, clear_all_respostas
 
 # ── SCHEMAS PYDANTIC ─────────────────────────────────────────
 class RespostaSurvey(BaseModel):
@@ -173,6 +173,14 @@ async def criar_resposta(resposta: RespostaSurvey):
 async def listar_respostas():
     """Retorna todas as respostas coletadas."""
     return get_all_respostas()
+
+# ── 2.1 LIMPEZA TOTAL DO BANCO (🔒 EXCLUSIVO DO ADMINISTRADOR) ──
+@app.delete("/api/respostas", dependencies=[Depends(verify_admin_token)])
+@app.post("/api/admin/limpar-banco", dependencies=[Depends(verify_admin_token)])
+async def limpar_banco():
+    """Remove todas as respostas gravadas (Postgres ou SQLite)."""
+    count = clear_all_respostas()
+    return {"status": "sucesso", "removidos": count, "mensagem": f"Banco de dados limpo com sucesso! ({count} respostas removidas)"}
 
 # ── 3. MÉTRICAS CONSOLIDADAS (🔒 EXCLUSIVO DO ADMINISTRADOR) ──
 @app.get("/api/metricas", dependencies=[Depends(verify_admin_token)])
