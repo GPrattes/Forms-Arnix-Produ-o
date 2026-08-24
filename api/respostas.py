@@ -9,7 +9,9 @@ Handles GET, POST, DELETE directly on Vercel without rewrite dependency.
 
 import os
 import sys
-from typing import List, Optional
+import time
+import hmac
+from typing import List, Optional, Dict
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, Header, HTTPException, Depends, Request
@@ -31,7 +33,7 @@ try:
 except Exception:
     def send_notification(resp, count): pass
 
-app = FastAPI(title="ARNIX Respostas Endpoint", version="2.1.0")
+app = FastAPI(title="ARNIX Respostas Endpoint", version="2.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,8 +43,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── 1. RATE LIMITING POR IP (SLIDING WINDOW) ───────────────────
+# Proteção contra bots, flooding e ataques de negação de serviço na ingestão
+RATE_LIMIT_STORE: Dict[str, List[float]] = {}
+RATE_LIMIT_MAX_POSTS = 10     # Máximo 10 submissões
+RATE_LIMIT_WINDOW_SECONDS = 60 # Em 60 segundos por IP
+
+def enforce_rate_limit(request: Request):
+    """Verifica e aplica limite de requisições por IP de origem."""
+    ip = (
+        request.headers.get("x-real-ip") or
+        request.headers.get("x-forwarded-for", "").split(",")[0].strip() or
+        request.client.host if request.client else "unknown"
+    )
+    now = time.time()
+    
+    # Limpa timestamps antigos
+    history = RATE_LIMIT_STORE.get(ip, [])
+    history = [t for t in history if now - t < RATE_LIMIT_WINDOW_SECONDS]
+    
+    if len(history) >= RATE_LIMIT_MAX_POSTS:
+        raise HTTPException(
+            status_code=429,
+            detail="Muitas requisições detectadas. Por favor, aguarde um minuto antes de tentar novamente (Proteção Anti-Flooding ARNIX)."
+        )
+    
+    history.append(now)
+    RATE_LIMIT_STORE[ip] = history
+
+# ── 2. AUTENTICAÇÃO COM TIMING-SAFE COMPARISON (ZERO-TRUST) ───
 ADMIN_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY", "Prattes@Arnix2026!Master")
-VALID_ADMIN_KEYS = {ADMIN_SECRET_KEY, "Prattes@Arnix2026!Master", "arnix2026", "prattes2026"}
+VALID_ADMIN_KEYS = [ADMIN_SECRET_KEY, "Prattes@Arnix2026!Master", "arnix2026", "prattes2026"]
 
 def verify_admin(
     x_admin_key: Optional[str] = Header(None),
@@ -54,7 +85,13 @@ def verify_admin(
     elif authorization and authorization.startswith("Bearer "):
         token = authorization.split("Bearer ", 1)[1].strip()
 
-    if not token or token not in VALID_ADMIN_KEYS:
+    if not token:
+        raise HTTPException(status_code=401, detail="Acesso Negado. Token de administrador não fornecido.")
+
+    # Comparação criptográfica segura contra ataques de timing
+    is_valid = any(hmac.compare_digest(token.lower(), vk.lower()) for vk in VALID_ADMIN_KEYS)
+    
+    if not is_valid:
         raise HTTPException(
             status_code=401,
             detail="Acesso Negado. Apenas o administrador autenticado da Prattes Technologies pode acessar os dados da pesquisa."
@@ -93,8 +130,11 @@ async def listar_respostas(admin: bool = Depends(verify_admin)):
 @app.post("/", status_code=201)
 @app.post("/api/respostas", status_code=201)
 @app.post("/respostas", status_code=201)
-async def criar_resposta(resposta: RespostaSurvey):
-    """Grava nova resposta de pesquisa."""
+async def criar_resposta(
+    resposta: RespostaSurvey,
+    rate_limit: None = Depends(enforce_rate_limit)
+):
+    """Grava nova resposta de pesquisa com proteção ativa contra abuso e spam."""
     now_utc = datetime.now(timezone.utc)
     resp_id = resposta.id or f"resp_{now_utc.strftime('%Y%m%d%H%M%S%f')[:18]}"
     criado_em = resposta.criado_em or now_utc.isoformat()
