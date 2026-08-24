@@ -18,7 +18,7 @@ import csv
 from typing import List, Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field
-from fastapi import FastAPI, Response, Header, HTTPException, Depends
+from fastapi import FastAPI, Response, Header, HTTPException, Depends, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -55,6 +55,36 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── MIDDLEWARE DE DIAGNÓSTICO (Vercel Path Logging) ────────────
+@app.middleware("http")
+async def vercel_request_logger(request: Request, call_next):
+    """Log detalhado de cada requisição para diagnosticar roteamento Vercel."""
+    path = request.url.path
+    method = request.method
+    print(f" [REQ] {method} {path} | scope_path={request.scope.get('path')} | root_path={request.scope.get('root_path')}")
+    response = await call_next(request)
+    print(f" [RES] {method} {path} -> {response.status_code}")
+    return response
+
+# ── ROTAS DE DIAGNÓSTICO PÚBLICAS ──────────────────────────────
+@app.get("/api/health")
+@app.get("/api/index.py/health")
+async def health_check():
+    """Endpoint público para verificar se a API está funcionando."""
+    return {
+        "status": "ok",
+        "is_postgres": db_module.IS_POSTGRES,
+        "is_vercel": db_module.IS_VERCEL,
+        "db_url_found": bool(db_module.DB_URL),
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+@app.get("/api/test-get")
+@app.get("/api/index.py/test-get")
+async def test_get_route():
+    """Rota GET de teste sem nenhuma dependência/autenticação."""
+    return {"method": "GET", "status": "working", "message": "GET route is functional!"}
 
 # ── GUARDA DE SEGURANÇA DO ADMINISTRADOR ───────────────────────
 ADMIN_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY", "Prattes@Arnix2026!Master")

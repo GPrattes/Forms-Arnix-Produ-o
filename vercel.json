@@ -3,13 +3,6 @@
   "name": "arnix-market-research",
   "cleanUrls": true,
   "trailingSlash": false,
-  "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python",
-      "config": { "maxLambdaSize": "15mb" }
-    }
-  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.py" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
