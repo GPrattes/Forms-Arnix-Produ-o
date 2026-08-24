@@ -8,12 +8,10 @@
     { "source": "/dashboard", "destination": "/frontend/dashboard.html" },
     { "source": "/dashboard.html", "destination": "/frontend/dashboard.html" },
     { "source": "/pesquisa", "destination": "/frontend/index.html" },
-    { "source": "/index.html", "destination": "/frontend/index.html" },
     { "source": "/css/(.*)", "destination": "/frontend/css/$1" },
     { "source": "/js/(.*)", "destination": "/frontend/js/$1" },
     { "source": "/img/(.*)", "destination": "/frontend/img/$1" },
-    { "source": "/favicon.ico", "destination": "/frontend/img/arnix-sgv.png" },
-    { "source": "/", "destination": "/frontend/index.html" }
+    { "source": "/favicon.ico", "destination": "/frontend/img/arnix-sgv.png" }
   ],
   "headers": [
     {

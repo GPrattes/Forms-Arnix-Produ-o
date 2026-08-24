@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARNIX — Market Validation Dashboard & AVS Score</title>
+  <meta name="description" content="Dashboard executivo de validação de mercado, evidências empíricas e cálculo do ARNIX Validation Score (AVS).">
+  <link rel="icon" type="image/png" href="img/arnix-sgv.png">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <!-- Chart.js para visualizações de dados -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Ambient Glow -->
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <!-- Top Navbar -->
+  <header class="dash-navbar">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand-badge">
+        <div class="brand-icon">A</div>
+        <div class="brand-title">ARNIX <span>Market Validation</span></div>
+      </a>
+
+      <div class="dash-actions">
+        <a href="index.html" class="btn" title="Abrir Formulário de Pesquisa">
+          <span>📝 Responder Pesquisa</span>
+        </a>
+        <button class="btn" onclick="seedSampleData()" title="Inserir amostras de demonstração caso a base esteja vazia">
+          <span>🌱 Gerar Dados Demo</span>
+        </button>
+        <button class="btn" onclick="exportDataCSV()" title="Exportar dados para Excel/Planilhas">
+          <span>📥 Exportar CSV</span>
+        </button>
+        <button class="btn btn-primary" onclick="printExecutiveReportPDF()" title="Salvar relatório executivo em PDF">
+          <span>📄 Imprimir / Salvar PDF</span>
+        </button>
+        <button class="btn" id="themeToggle" type="button" aria-label="Alternar Tema">
+          <span>🌓</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ── CABEÇALHO EXECUTIVO INSTITUCIONAL (EXIBIDO NO PDF/IMPRESSÃO) ── -->
+    <div class="print-header-report">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2.5px solid #6c3ce1; padding-bottom:14px; margin-bottom:24px;">
+        <div>
+          <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#6c3ce1; margin-bottom:4px;">
+            ESTUDO DE MERCADO • EMPREENDA 2026
+          </div>
+          <h1 style="font-size:24px; font-weight:900; color:#0f172a; margin:0; line-height:1.2;">
+            ARNIX — Relatório Executivo de Validação de Mercado
+          </h1>
+          <p style="font-size:12px; color:#475569; margin:4px 0 0;">
+            Empresa Responsável: <strong>ARNIX Smart Pricing Systems / Orbb Tecnologia & Consultoria</strong>
+          </p>
+        </div>
+        <div style="text-align:right; font-size:11px; color:#475569; line-height:1.5;">
+          <div><strong>Data de Emissão:</strong> <span id="printDate">24/08/2026</span></div>
+          <div><strong>Metodologia:</strong> Pesquisa Empírica Quali-Quantitativa</div>
+          <div><strong>Conformidade:</strong> LGPD (Dados 100% Anonimizados)</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Header Banner -->
+    <section class="dash-header">
+      <div class="header-tag">📊 Validação de Mercado & Empreendedorismo</div>
+      <h1 class="dash-title">ARNIX — Market Validation Dashboard</h1>
+      <p class="dash-subtitle">
+        Consolidação automática de evidências empíricas, dores de precificação, disposição a pagar (WTP) e o índice <strong>ARNIX Validation Score (AVS)</strong>.
+      </p>
+    </section>
+
+    <!-- ── 1. ARNIX VALIDATION SCORE (AVS GAUGE CARD) ─────────── -->
+    <section class="avs-banner-card">
+      <div class="avs-score-side">
+        <div class="avs-score-pill">MÉTRICA PROPRIETÁRIA</div>
+        <div class="avs-score-number" id="avsScoreDisplay">78</div>
+        <div class="avs-score-label">ARNIX Validation Score</div>
+        <div class="avs-score-status" id="avsStatusLabel">● Strong Market Signal (78/100)</div>
+      </div>
+
+      <div class="avs-breakdown-side">
+        <h3>Composição Ponderada do Score (AVS Formula)</h3>
+        
+        <div class="avs-progress-item">
+          <div class="avs-progress-labels">
+            <span>Intensidade do Problema (Peso 30%)</span>
+            <strong id="avs-w-problema">73%</strong>
+          </div>
+          <div class="avs-progress-bg">
+            <div class="avs-progress-bar" id="avs-bar-problema" style="width: 73%"></div>
+          </div>
+        </div>
+
+        <div class="avs-progress-item">
+          <div class="avs-progress-labels">
+            <span>Interesse na Solução ARNIX (Peso 25%)</span>
+            <strong id="avs-w-interesse">78%</strong>
+          </div>
+          <div class="avs-progress-bg">
+            <div class="avs-progress-bar" id="avs-bar-interesse" style="width: 78%"></div>
+          </div>
+        </div>
+
+        <div class="avs-progress-item">
+          <div class="avs-progress-labels">
+            <span>Intenção de Uso Frequente (Peso 20%)</span>
+            <strong id="avs-w-uso">68%</strong>
+          </div>
+          <div class="avs-progress-bg">
+            <div class="avs-progress-bar" id="avs-bar-uso" style="width: 68%"></div>
+          </div>
+        </div>
+
+        <div class="avs-progress-item">
+          <div class="avs-progress-labels">
+            <span>Disposição de Pagamento WTP (Peso 15%)</span>
+            <strong id="avs-w-pagamento">52%</strong>
+          </div>
+          <div class="avs-progress-bg">
+            <div class="avs-progress-bar" id="avs-bar-pagamento" style="width: 52%"></div>
+          </div>
+        </div>
+
+        <div class="avs-progress-item">
+          <div class="avs-progress-labels">
+            <span>Frequência da Dificuldade (Peso 10%)</span>
+            <strong id="avs-w-frequencia">81%</strong>
+          </div>
+          <div class="avs-progress-bg">
+            <div class="avs-progress-bar" id="avs-bar-frequencia" style="width: 81%"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 2. KPI SUMMARY CARDS (6 CARDS) ─────────────────────── -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">Respondentes <span>👥</span></div>
+        <div class="kpi-value" id="kpi-respondentes">87</div>
+        <div class="kpi-desc">Amostra total validada</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Problema Crítico <span>⚠️</span></div>
+        <div class="kpi-value" style="color:var(--amber-500)" id="kpi-problema">73%</div>
+        <div class="kpi-desc">Dificuldade frequente</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Interesse ARNIX <span>⚡</span></div>
+        <div class="kpi-value" style="color:var(--violet-lt)" id="kpi-interesse">78%</div>
+        <div class="kpi-desc">Resolveria suas dores</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Disposição WTP <span>💰</span></div>
+        <div class="kpi-value" style="color:var(--emerald-500)" id="kpi-pagamento">52%</div>
+        <div class="kpi-desc">Aceitam plano pago</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Preço de Referência <span>🏷️</span></div>
+        <div class="kpi-value" style="color:var(--cyan-500)" id="kpi-preco">R$ 49,90</div>
+        <div class="kpi-desc">Ticket médio aceito/mês</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Conversão Potencial <span>🎯</span></div>
+        <div class="kpi-value" style="color:var(--emerald-500)" id="kpi-conversao">41%</div>
+        <div class="kpi-desc">Uso frequente + Pagante</div>
+      </div>
+    </section>
+
+    <!-- ── 3. VISUAL CHARTS (CHART.JS) ────────────────────────── -->
+    <section class="charts-grid">
+      <!-- Gráfico 1: Métodos Atuais -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Método Atual de Precificação</div>
+            <div class="chart-desc">Como os respondentes calculam preços hoje</div>
+          </div>
+        </div>
+        <div class="chart-body">
+          <canvas id="chartMetodos"></canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico 2: Disposição de Pagamento (WTP) -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Disposição de Pagamento Mensal (WTP)</div>
+            <div class="chart-desc">Distribuição por faixa de preço aceitável</div>
+          </div>
+        </div>
+        <div class="chart-body">
+          <canvas id="chartPreco"></canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico 3: Maiores Dificuldades -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Maiores Dores & Gargalos</div>
+            <div class="chart-desc">Frequência das dificuldades apontadas</div>
+          </div>
+        </div>
+        <div class="chart-body">
+          <canvas id="chartDores"></canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico 4: Impacto Financeiro -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Evidências de Prejuízo & Perda de Vendas</div>
+            <div class="chart-desc">Impacto real no fluxo de caixa dos negócios</div>
+          </div>
+        </div>
+        <div class="chart-body">
+          <canvas id="chartImpacto"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 4. RESPOSTAS INDIVIDUAIS ANONIMIZADAS ──────────────── -->
+    <section class="table-card">
+      <div class="table-header-wrap">
+        <div>
+          <h2 style="font-size:1.15rem; font-weight:700">Respostas Recentes Coletadas</h2>
+          <p style="font-size:0.8rem; color:var(--text-muted)">Dados brutos anonimizados em conformidade com as diretrizes LGPD</p>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center">
+          <select id="filterSegmento" class="btn" onchange="renderResponsesTable()">
+            <option value="todos">Todos os Segmentos</option>
+            <option value="Serviços">Serviços</option>
+            <option value="Tecnologia">Tecnologia</option>
+            <option value="Comércio">Comércio</option>
+            <option value="Agência/Consultoria">Agências & Consultoria</option>
+            <option value="Alimentação">Alimentação</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="resp-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Relação / Cargo</th>
+              <th>Porte</th>
+              <th>Segmento</th>
+              <th>Método Atual</th>
+              <th>Dificuldade</th>
+              <th>ARNIX Resolveria?</th>
+              <th>Disposição a Pagar</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="responsesTableBody">
+            <!-- Injetado via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── RODAPÉ EXECUTIVO INSTITUCIONAL (EXIBIDO NO PDF/IMPRESSÃO) ── -->
+    <div class="print-footer-report">
+      <div style="border-top:1.5px solid #cbd5e1; padding-top:16px; margin-top:36px; display:flex; justify-content:space-between; align-items:flex-start; font-size:11px; color:#475569; line-height:1.6;">
+        <div>
+          <strong>ARNIX Smart Pricing & FinOps Platform</strong> — Todos os direitos reservados © 2026.<br>
+          Relatório consolidado gerado automaticamente a partir de respostas primárias de empreendedores e autônomos.
+        </div>
+        <div style="text-align:right">
+          Empresa Responsável: <strong>Orbb Tecnologia & Consultoria Ltda</strong><br>
+          Auditoria de Dados: <strong>Conforme Diretrizes LGPD (100% Anonimizado)</strong>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
