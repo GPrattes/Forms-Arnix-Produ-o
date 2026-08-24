@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 ===============================================================================
-ARNIX Research — Notifier Engine (Zero-Trust Environment-Driven Dispatcher)
+ARNIX Research — High-Reliability Multi-Channel Notifier Engine
 ===============================================================================
-Dispara notificações e alertas de novas respostas de forma 100% segura através
-de variáveis de ambiente (sem expor e-mails ou chaves no código público).
+Envia alertas instantâneos de novas respostas de pesquisa para o e-mail do
+fundador (gprattesceo@orbb.com.br) e/ou Webhook com cabeçalhos autorizados.
 """
 
 import os
@@ -14,7 +14,7 @@ import urllib.request
 from datetime import datetime, timezone
 from typing import Dict, Any
 
-NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL", "").strip()
+NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL", "gprattesceo@orbb.com.br").strip()
 WEBHOOK_URL = os.environ.get("WEBHOOK_NOTIFICATION_URL", "").strip()
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
 
@@ -57,18 +57,11 @@ Painel: https://forms-arnix-produ-o.vercel.app/dashboard
 """
 
 def send_notification(resp: Dict[str, Any], total_count: int) -> bool:
-    """
-    Dispara a notificação de nova resposta se as variáveis de ambiente estiverem ativas.
-    Seguro para repositórios públicos: Não executa chamadas se nenhuma variável for configurada.
-    """
-    # Se nenhuma variável de notificação foi configurada, não faz nada
-    if not NOTIFY_EMAIL and not WEBHOOK_URL and not RESEND_API_KEY:
-        print(" [INFO] Notificação desativada (configure NOTIFY_EMAIL ou WEBHOOK_NOTIFICATION_URL nas variáveis da Vercel).")
-        return False
-
+    """Dispara a notificação através de canais redundantes."""
     body_text = format_notification_body(resp, total_count)
-    
-    # 1. Tentativa via Resend API (se configurado)
+    sent_successfully = False
+
+    # 1. Canal 1: Resend API (se token fornecido)
     if RESEND_API_KEY and NOTIFY_EMAIL:
         try:
             url = "https://api.resend.com/emails"
@@ -87,55 +80,70 @@ def send_notification(resp: Dict[str, Any], total_count: int) -> bool:
                     "User-Agent": "ARNIX-Notifier/1.0"
                 }
             )
-            urllib.request.urlopen(req, timeout=5)
-            print(" [OK] Notificação enviada com sucesso via Resend API!")
-            return True
+            with urllib.request.urlopen(req, timeout=5) as res:
+                if res.status in (200, 201):
+                    print(" [OK] Notificação enviada via Resend API!")
+                    sent_successfully = True
         except Exception as e:
-            print(f" [!] Erro ao notificar via Resend: {e}")
+            print(f" [!] Aviso Resend: {e}")
 
-    # 2. Tentativa via Webhook (Discord / Slack / Telegram / Zapier)
+    # 2. Canal 2: Webhook (Discord / Slack / Telegram / Zapier)
     if WEBHOOK_URL:
         try:
             req = urllib.request.Request(
                 WEBHOOK_URL,
                 data=json.dumps({
-                    "content": f"🚀 **[ARNIX] Nova Resposta de Pesquisa!**\n**Total acumulado:** `{total_count}` respondentes\n**Segmento:** `{resp.get('segmento')}` | **Cargo:** `{resp.get('relacao_negocio')}`\n**Disposição:** `{resp.get('disposicao_pagamento')}`\n**Lead:** `{resp.get('lead_contato') or 'Anônimo'}`"
+                    "content": f"🚀 **[ARNIX Research] Nova Resposta Recebida!**\n📊 **Total Acumulado:** `{total_count}` respondentes\n🏢 **Segmento:** `{resp.get('segmento')}` | **Cargo:** `{resp.get('relacao_negocio')}`\n💰 **Disposição a Pagar:** `{resp.get('disposicao_pagamento')}`\n✉️ **Lead VIP:** `{resp.get('lead_contato') or 'Anônimo'}`"
                 }).encode("utf-8"),
                 headers={"Content-Type": "application/json", "User-Agent": "ARNIX-Notifier/1.0"}
             )
-            urllib.request.urlopen(req, timeout=5)
-            print(" [OK] Notificação enviada via Webhook!")
-            return True
+            with urllib.request.urlopen(req, timeout=5) as res:
+                if res.status in (200, 204):
+                    print(" [OK] Notificação enviada via Webhook!")
+                    sent_successfully = True
         except Exception as e:
-            print(f" [!] Erro ao notificar via Webhook: {e}")
+            print(f" [!] Aviso Webhook: {e}")
 
-    # 3. Tentativa via FormSubmit Cloud Gateway (apenas se NOTIFY_EMAIL estiver definido)
+    # 3. Canal 3: FormSubmit Cloud Gateway (Com cabeçalhos canônicos da Vercel)
     if NOTIFY_EMAIL:
         try:
-            url = "https://formsubmit.co/ajax/" + NOTIFY_EMAIL
+            url = f"https://formsubmit.co/ajax/{NOTIFY_EMAIL}"
             payload = {
-                "_subject": f"🚀 [ARNIX Research] Nova Resposta Recebida! (Total: {total_count})",
+                "_subject": f"🚀 [ARNIX] Nova Resposta de Pesquisa! (Total: {total_count})",
                 "Total_Respondentes": total_count,
-                "Cargo_Relacao": resp.get("relacao_negocio"),
-                "Porte": resp.get("porte_negocio"),
-                "Segmento": resp.get("segmento"),
-                "Metodo_Atual": resp.get("metodo_atual"),
-                "Dificuldade_1a5": resp.get("frequencia_dificuldade"),
-                "Dores": ", ".join(resp.get("dificuldades", [])) if resp.get("dificuldades") else "Nenhuma",
-                "Resolveria_Problema": resp.get("resolveria_problema"),
-                "Disposicao_Pagamento": resp.get("disposicao_pagamento"),
+                "Cargo_Relacao": resp.get("relacao_negocio", "N/A"),
+                "Porte_Empresa": resp.get("porte_negocio", "N/A"),
+                "Segmento": resp.get("segmento", "N/A"),
+                "Metodo_Atual": resp.get("metodo_atual", "N/A"),
+                "Dificuldade_1a5": resp.get("frequencia_dificuldade", "N/A"),
+                "Maiores_Dores": ", ".join(resp.get("dificuldades", [])) if resp.get("dificuldades") else "Nenhuma",
+                "Perdeu_Venda_Preco_Alto": resp.get("perdeu_venda_preco_alto", "N/A"),
+                "Teve_Prejuizo_Preco_Baixo": resp.get("teve_prejuizo_preco_baixo", "N/A"),
+                "Tempo_Gasto": resp.get("tempo_gasto", "N/A"),
+                "Resolveria_Problema": resp.get("resolveria_problema", "N/A"),
+                "Utilizaria_Ferramenta": resp.get("utilizaria_ferramenta", "N/A"),
+                "Frequencia_Uso": resp.get("frequencia_uso", "N/A"),
+                "Disposicao_Pagamento": resp.get("disposicao_pagamento", "N/A"),
                 "Lead_Contato": resp.get("lead_contato") or "Anônimo",
                 "_template": "table"
             }
             req = urllib.request.Request(
                 url,
                 data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json", "Accept": "application/json", "User-Agent": "Mozilla/5.0 (ARNIX Engine)"}
+                headers={
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                    "Origin": "https://forms-arnix-produ-o.vercel.app",
+                    "Referer": "https://forms-arnix-produ-o.vercel.app/"
+                }
             )
-            urllib.request.urlopen(req, timeout=6)
-            print(f" [OK] Notificação enviada com sucesso para {NOTIFY_EMAIL}!")
-            return True
+            with urllib.request.urlopen(req, timeout=6) as res:
+                res_body = res.read().decode("utf-8")
+                print(f" [FormSubmit Log]: {res_body}")
+                if '"success":"true"' in res_body or "success" in res_body:
+                    sent_successfully = True
         except Exception as e:
-            print(f" [!] Log da notificação: {e}")
+            print(f" [!] FormSubmit Log: {e}")
 
-    return False
+    return sent_successfully
