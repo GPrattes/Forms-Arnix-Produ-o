@@ -18,8 +18,25 @@ import sqlite3
 import hashlib
 from typing import List, Dict, Any, Optional
 
-DB_URL = os.environ.get("POSTGRES_URL") or os.environ.get("DATABASE_URL") or ""
+# Detecção flexível e universal da URL de conexão PostgreSQL da Vercel/Neon
+DB_URL = (
+    os.environ.get("POSTGRES_URL") or
+    os.environ.get("DATABASE_URL") or
+    os.environ.get("POSTGRES_URL_NON_POOLING") or
+    os.environ.get("POSTGRES_PRISMA_URL") or
+    os.environ.get("ARMAZENAR_URL") or
+    os.environ.get("NEON_DATABASE_URL") or
+    ""
+)
 
+# Varredura dinâmica para qualquer prefixo customizado gerado pela Vercel
+if not DB_URL:
+    for k, v in os.environ.items():
+        if k.endswith("_URL") and isinstance(v, str) and ("postgres" in v or "postgresql" in v):
+            DB_URL = v
+            break
+
+# Normaliza postgres:// para postgresql:// para compatibilidade com psycopg2
 if DB_URL.startswith("postgres://"):
     DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)
 
