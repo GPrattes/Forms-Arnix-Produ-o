@@ -163,6 +163,10 @@ async def login_admin(req: AdminAuthRequest):
 # ── 1. INGESTÃO PÚBLICA (ABERTO PARA O PÚBLICO COM ANTI-DUPLICAÇÃO)
 @app.post("/api/respostas", status_code=201)
 @app.post("/respostas", status_code=201)
+@app.post("/api/index.py/respostas", status_code=201)
+@app.post("/api/index/respostas", status_code=201)
+@app.post("/api/index.py", status_code=201)
+@app.post("/api/index", status_code=201)
 async def criar_resposta_serverless(resposta: RespostaSurvey):
     now_utc = datetime.now(timezone.utc)
     resp_id = resposta.id or f"resp_{now_utc.strftime('%Y%m%d%H%M%S%f')[:18]}"
@@ -198,13 +202,17 @@ async def criar_resposta_serverless(resposta: RespostaSurvey):
 # ── 2. CONSULTA DO BANCO (🔒 EXCLUSIVO DO ADMINISTRADOR) ──────
 @app.get("/api/respostas", dependencies=[Depends(verify_admin_token)])
 @app.get("/respostas", dependencies=[Depends(verify_admin_token)])
+@app.get("/api/index.py/respostas", dependencies=[Depends(verify_admin_token)])
+@app.get("/api/index/respostas", dependencies=[Depends(verify_admin_token)])
 async def listar_respostas_serverless():
     return get_all_respostas()
 
 # ── 2.1 LIMPEZA TOTAL DO BANCO (🔒 EXCLUSIVO DO ADMINISTRADOR) ──
 @app.delete("/api/respostas", dependencies=[Depends(verify_admin_token)])
 @app.delete("/respostas", dependencies=[Depends(verify_admin_token)])
+@app.delete("/api/index.py/respostas", dependencies=[Depends(verify_admin_token)])
 @app.post("/api/admin/limpar-banco", dependencies=[Depends(verify_admin_token)])
+@app.post("/admin/limpar-banco", dependencies=[Depends(verify_admin_token)])
 async def limpar_banco_serverless():
     """Remove todas as respostas gravadas (Postgres ou SQLite)."""
     count = clear_all_respostas()
@@ -213,6 +221,8 @@ async def limpar_banco_serverless():
 # ── 3. MÉTRICAS ESTATÍSTICAS (🔒 EXCLUSIVO DO ADMINISTRADOR) ──
 @app.get("/api/metricas", dependencies=[Depends(verify_admin_token)])
 @app.get("/metricas", dependencies=[Depends(verify_admin_token)])
+@app.get("/api/index.py/metricas", dependencies=[Depends(verify_admin_token)])
+@app.get("/api/index/metricas", dependencies=[Depends(verify_admin_token)])
 async def obter_metricas_serverless():
     respostas = get_all_respostas()
     total = len(respostas)

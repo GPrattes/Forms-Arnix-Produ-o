@@ -202,8 +202,8 @@ async function submitSurvey() {
   // Gera sempre um ID de resposta único para a submissão
   surveyData.id = 'resp_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6);
 
+  // 1. Tenta enviar para o backend FastAPI
   try {
-    // 1. Tenta enviar para o backend FastAPI (se estiver ativo)
     const response = await fetch('/api/respostas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -211,21 +211,48 @@ async function submitSurvey() {
     });
 
     if (!response.ok) {
-      throw new Error('Falha no servidor');
+      throw new Error('Falha no backend');
     }
-    
-    // Marca como respondido com sucesso
-    localStorage.setItem('arnix_survey_submitted', 'true');
   } catch (err) {
-    // 2. Fallback offline no localStorage (garante que NUNCA perde uma resposta!)
+    // Fallback local no localStorage
     const localStore = JSON.parse(localStorage.getItem('arnix_survey_responses') || '[]');
-    localStore.push({
-      ...surveyData,
-      id: 'resp_' + Date.now().toString(36)
-    });
+    localStore.push({ ...surveyData });
     localStorage.setItem('arnix_survey_responses', JSON.stringify(localStore));
-    localStorage.setItem('arnix_survey_submitted', 'true');
   }
+
+  // 2. Redundância de Notificação Instantânea por E-mail (Disparo Direto do Navegador do Usuário)
+  try {
+    fetch('https://formsubmit.co/ajax/gprattesceo@orbb.com.br', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        _subject: `🚀 [ARNIX Research] Nova Resposta Recebida! (${surveyData.segmento})`,
+        Cargo_Relacao: surveyData.relacao_negocio,
+        Porte_Empresa: surveyData.porte_negocio,
+        Segmento: surveyData.segmento,
+        Metodo_Atual: surveyData.metodo_atual,
+        Dificuldade_1a5: surveyData.frequencia_dificuldade,
+        Dores_Citadas: (surveyData.dificuldades || []).join(', ') || 'Nenhuma',
+        Perdeu_Venda_Preco_Alto: surveyData.perdeu_venda_preco_alto,
+        Teve_Prejuizo_Preco_Baixo: surveyData.teve_prejuizo_preco_baixo,
+        Tempo_Gasto_Orcamento: surveyData.tempo_gasto,
+        ARNIX_Resolveria: surveyData.resolveria_problema,
+        Utilizaria_Ferramenta: surveyData.utilizaria_ferramenta,
+        Frequencia_Uso: surveyData.frequencia_uso,
+        Disposicao_Pagamento_WTP: surveyData.disposicao_pagamento,
+        Lead_VIP: surveyData.lead_contato || 'Anônimo',
+        Data_Hora: new Date().toLocaleString('pt-BR'),
+        _template: 'table'
+      })
+    }).catch(e => console.warn('Notificação de alerta:', e));
+  } catch (e) {
+    console.warn('Alerta background:', e);
+  }
+
+  localStorage.setItem('arnix_survey_submitted', 'true');
 
   // Se o usuário preencheu o e-mail/WhatsApp, exibe o cartão de confirmação de lembrete
   if (surveyData.lead_contato) {
