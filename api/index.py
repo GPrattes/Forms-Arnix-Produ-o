@@ -56,16 +56,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── MIDDLEWARE PURO ASGI PARA VERCEL (RESTAURA O PATH ORIGINAL) ──
+class VercelPathFixMiddleware:
+    """
+    Quando a Vercel reescreve /api/(.*) -> /api/index.py, ela envia o caminho
+    original no cabeçalho x-matched-path (ou x-vercel-matched-path).
+    Este middleware atualiza scope['path'] antes do roteamento do FastAPI.
+    """
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] in ("http", "websocket"):
+            headers = dict(scope.get("headers", []))
+            matched_path = (
+                headers.get(b"x-matched-path", b"").decode("utf-8", errors="ignore") or
+                headers.get(b"x-vercel-matched-path", b"").decode("utf-8", errors="ignore") or
+                headers.get(b"x-forwarded-uri", b"").decode("utf-8", errors="ignore") or
+                headers.get(b"x-original-url", b"").decode("utf-8", errors="ignore")
+            )
+            if matched_path:
+                clean_path = matched_path.split("?")[0]
+                scope["path"] = clean_path
+                scope["raw_path"] = clean_path.encode("utf-8")
+        await self.app(scope, receive, send)
+
+app.add_middleware(VercelPathFixMiddleware)
+
 # ── MIDDLEWARE DE DIAGNÓSTICO (Vercel Path Logging) ────────────
 @app.middleware("http")
 async def vercel_request_logger(request: Request, call_next):
     """Log detalhado de cada requisição para diagnosticar roteamento Vercel."""
     path = request.url.path
     method = request.method
-    print(f" [REQ] {method} {path} | scope_path={request.scope.get('path')} | root_path={request.scope.get('root_path')}")
+    print(f" [REQ] {method} {path} | scope_path={request.scope.get('path')}")
     response = await call_next(request)
     print(f" [RES] {method} {path} -> {response.status_code}")
     return response
+
+# ── ROTAS RAIZ DA API (GET /api/index.py ou GET /api) ──────────
+@app.get("/api")
+@app.get("/api/")
+@app.get("/api/index")
+@app.get("/api/index.py")
+async def api_root_info():
+    """Retorna informações e status da API."""
+    return {
+        "status": "online",
+        "service": "ARNIX Research Serverless API",
+        "is_postgres": db_module.IS_POSTGRES,
+        "is_vercel": db_module.IS_VERCEL,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
 
 # ── ROTAS DE DIAGNÓSTICO PÚBLICAS ──────────────────────────────
 @app.get("/api/health")
