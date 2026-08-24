@@ -31,6 +31,7 @@ jobs:
         run: |
           python -m py_compile backend/server.py
           python -m py_compile backend/db.py
+          python -m py_compile backend/notifier.py
           python -m py_compile api/index.py
 
       - name: Executar Teste Funcional dos Endpoints & Segurança
@@ -53,6 +54,7 @@ jobs:
           test -f frontend/sobre.html && echo "[OK] frontend/sobre.html presente"
           test -f frontend/fundador.html && echo "[OK] frontend/fundador.html presente"
           test -f backend/server.py && echo "[OK] backend/server.py presente"
+          test -f backend/notifier.py && echo "[OK] backend/notifier.py presente"
           test -f api/index.py && echo "[OK] api/index.py presente"
           echo "========================================================"
           echo " ✅ ARNIX RESEARCH SYSTEM — 100% PRONTO PARA PRODUÇÃO"

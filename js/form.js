@@ -199,11 +199,8 @@ async function submitSurvey() {
     submitBtn.innerHTML = '<span>Salvando respostas...</span>';
   }
 
-  // Previne envio duplicado se o usuário já tiver enviado
-  if (localStorage.getItem('arnix_survey_submitted') === 'true') {
-    nextStep(6);
-    return;
-  }
+  // Gera sempre um ID de resposta único para a submissão
+  surveyData.id = 'resp_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6);
 
   try {
     // 1. Tenta enviar para o backend FastAPI (se estiver ativo)

@@ -370,6 +370,19 @@ function renderResponsesTable() {
     return r.segmento === filterSegmento;
   });
 
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" style="text-align:center; padding:36px; color:var(--text-muted);">
+          <div style="font-size:1.8rem; margin-bottom:8px">📭</div>
+          <strong>Nenhuma resposta registrada no momento.</strong>
+          <p style="margin:4px 0 0; font-size:0.85rem">Aguardando novos respondentes ou clique em "🌱 Gerar Dados Demo" para pré-visualizar.</p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
   filtered.slice(0, 50).forEach((r, idx) => {
     const tr = document.createElement('tr');
     const idDisplay = r.id ? r.id.substring(0, 8) : `#${idx + 1}`;

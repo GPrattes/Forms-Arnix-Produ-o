@@ -36,6 +36,11 @@ if BASE_DIR not in sys.path:
 
 from db import insert_resposta, get_all_respostas, clear_all_respostas
 
+try:
+    from notifier import send_notification
+except Exception:
+    def send_notification(resp, count): pass
+
 app = FastAPI(
     title="ARNIX Research Serverless API (Enterprise Secured)",
     description="API Serverless com autenticação restrita de administrador para proteção de banco de dados e métricas.",
@@ -175,6 +180,13 @@ async def criar_resposta_serverless(resposta: RespostaSurvey):
             "duplicado": True,
             "mensagem": "Sua resposta já havia sido computada anteriormente! Agradecemos a participação."
         }
+
+    # Dispara notificação por e-mail com a contagem total de respondentes
+    try:
+        total_respostas = len(get_all_respostas())
+        send_notification(payload, total_respostas)
+    except Exception as e:
+        print(f" [!] Aviso no envio de alerta: {e}")
 
     return {
         "status": "sucesso",

@@ -38,6 +38,11 @@ IMG_DIR = os.path.join(FRONTEND_DIR, "img")
 # Importa o driver de banco dual (Vercel Postgres / SQLite)
 from db import insert_resposta, get_all_respostas, clear_all_respostas
 
+try:
+    from notifier import send_notification
+except Exception:
+    def send_notification(resp, count): pass
+
 # ── SCHEMAS PYDANTIC ─────────────────────────────────────────
 class RespostaSurvey(BaseModel):
     id: Optional[str] = None
@@ -160,6 +165,13 @@ async def criar_resposta(resposta: RespostaSurvey):
             "duplicado": True,
             "mensagem": "Sua resposta já havia sido computada anteriormente! Agradecemos a participação."
         }
+
+    # Dispara notificação de nova resposta para o e-mail do fundador
+    try:
+        total_respostas = len(get_all_respostas())
+        send_notification(payload, total_respostas)
+    except Exception as e:
+        print(f" [!] Aviso no envio de alerta: {e}")
 
     return {
         "status": "sucesso",
