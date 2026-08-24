@@ -105,8 +105,9 @@ class RespostaSurvey(BaseModel):
     lead_contato: Optional[str] = None
     criado_em: Optional[str] = None
 
-# ── ROTAS DE API ─────────────────────────────────────────────
+# ── ROTAS DE API (DUAL COMPATIBILITY COM E SEM PREFIXO /API) ───
 @app.post("/api/respostas", status_code=201)
+@app.post("/respostas", status_code=201)
 async def criar_resposta_serverless(resposta: RespostaSurvey):
     now_utc = datetime.now(timezone.utc)
     resp_id = resposta.id or f"resp_{now_utc.strftime('%Y%m%d%H%M%S%f')[:18]}"
@@ -120,10 +121,12 @@ async def criar_resposta_serverless(resposta: RespostaSurvey):
     return {"status": "sucesso", "id": resp_id, "mensagem": "Resposta registrada com sucesso no Vercel Postgres!"}
 
 @app.get("/api/respostas")
+@app.get("/respostas")
 async def listar_respostas_serverless():
     return get_all_respostas()
 
 @app.get("/api/metricas")
+@app.get("/metricas")
 async def obter_metricas_serverless():
     respostas = get_all_respostas()
     total = len(respostas)
@@ -165,6 +168,7 @@ async def obter_metricas_serverless():
     }
 
 @app.get("/api/exportar/csv")
+@app.get("/exportar/csv")
 async def exportar_csv_serverless():
     respostas = get_all_respostas()
     output = io.StringIO()
