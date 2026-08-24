@@ -365,3 +365,10 @@ async def exportar_csv_serverless():
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f"attachment; filename=arnix_validacao_mercado_{now_str}.csv"}
     )
+
+# ══════════════════════════════════════════════════════════════
+# VERCEL PYTHON RUNTIME HANDLER EXPORT
+# A Vercel exige que a variável 'app' ou 'handler' esteja exportada
+# no nível do módulo para rotear TODOS os métodos HTTP (GET, POST, DELETE).
+# ══════════════════════════════════════════════════════════════
+handler = app
