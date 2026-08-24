@@ -109,6 +109,17 @@ async def serve_form():
 async def serve_dashboard():
     return FileResponse(os.path.join(FRONTEND_DIR, "dashboard.html"))
 
+@app.get("/sobre", include_in_schema=False)
+@app.get("/sobre.html", include_in_schema=False)
+async def serve_sobre():
+    return FileResponse(os.path.join(FRONTEND_DIR, "sobre.html"))
+
+@app.get("/fundador", include_in_schema=False)
+@app.get("/fundador.html", include_in_schema=False)
+@app.get("/gabriel-prattes", include_in_schema=False)
+async def serve_fundador():
+    return FileResponse(os.path.join(FRONTEND_DIR, "fundador.html"))
+
 @app.get("/favicon.ico", include_in_schema=False)
 async def serve_favicon():
     favicon_path = os.path.join(IMG_DIR, "arnix-sgv.png")

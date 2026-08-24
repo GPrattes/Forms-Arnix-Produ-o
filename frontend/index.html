@@ -22,10 +22,14 @@
         <span>ARNIX <strong>Research</strong></span>
       </a>
 
-      <button class="theme-toggle-btn" id="themeToggle" type="button" aria-label="Alternar Tema">
-        <span>🌓</span>
-        <span id="themeToggleText">Modo Claro</span>
-      </button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <a href="sobre.html" class="btn btn-ghost" style="padding:8px 12px; font-size:0.82rem; text-decoration:none">💡 Sobre</a>
+        <a href="fundador.html" class="btn btn-ghost" style="padding:8px 12px; font-size:0.82rem; text-decoration:none">👤 Fundador</a>
+        <button class="theme-toggle-btn" id="themeToggle" type="button" aria-label="Alternar Tema">
+          <span>🌓</span>
+          <span id="themeToggleText">Tema</span>
+        </button>
+      </div>
     </div>
 
     <!-- Progress Bar (Steps 1 to 5) -->
@@ -582,8 +586,13 @@
     </main>
 
     <!-- Footer note -->
-    <footer class="form-footer">
-      Pesquisa de Validação de Mercado • ARNIX Pricing & FinOps Engine © 2026
+    <footer class="form-footer" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; align-items:center;">
+      <div>Pesquisa de Validação de Mercado • ARNIX Pricing & FinOps Engine © 2026</div>
+      <div style="display:flex; gap:14px;">
+        <a href="sobre.html" style="color:var(--text-muted); text-decoration:none; font-size:0.82rem">Sobre o ARNIX</a>
+        <a href="fundador.html" style="color:var(--text-muted); text-decoration:none; font-size:0.82rem">Gabriel Prattes (CEO)</a>
+        <a href="https://orbb.com.br" target="_blank" rel="noopener" style="color:var(--text-muted); text-decoration:none; font-size:0.82rem">Orbb.com.br</a>
+      </div>
     </footer>
 
   </div>

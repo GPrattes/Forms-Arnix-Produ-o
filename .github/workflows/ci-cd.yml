@@ -33,9 +33,9 @@ jobs:
           python -m py_compile backend/db.py
           python -m py_compile api/index.py
 
-      - name: Executar Teste Funcional dos Endpoints
+      - name: Executar Teste Funcional dos Endpoints & Segurança
         run: |
-          python -c "import sys; sys.path.insert(0, 'backend'); from fastapi.testclient import TestClient; from server import app; client = TestClient(app); assert client.get('/').status_code == 200; assert client.get('/dashboard').status_code == 200; assert client.get('/api/metricas').status_code == 200; print('[OK] Todos os endpoints do forms responderam com status 200!')"
+          python -c "import sys; sys.path.insert(0, 'backend'); from fastapi.testclient import TestClient; from server import app; client = TestClient(app); assert client.get('/').status_code == 200; assert client.get('/dashboard').status_code == 200; assert client.get('/sobre').status_code == 200; assert client.get('/fundador').status_code == 200; assert client.get('/api/metricas').status_code == 401, 'Deveria bloquear sem token'; assert client.get('/api/metricas', headers={'x-admin-key': 'Prattes@Arnix2026!Master'}).status_code == 200, 'Deveria permitir com token admin'; print('[OK] Todos os endpoints do forms responderam e a segurança está 100% ativa!')"
 
   deploy-check:
     name: 🚀 Vercel & Production Verification
@@ -50,6 +50,8 @@ jobs:
           test -f vercel.json && echo "[OK] vercel.json presente"
           test -f frontend/index.html && echo "[OK] frontend/index.html presente"
           test -f frontend/dashboard.html && echo "[OK] frontend/dashboard.html presente"
+          test -f frontend/sobre.html && echo "[OK] frontend/sobre.html presente"
+          test -f frontend/fundador.html && echo "[OK] frontend/fundador.html presente"
           test -f backend/server.py && echo "[OK] backend/server.py presente"
           test -f api/index.py && echo "[OK] api/index.py presente"
           echo "========================================================"

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gabriel Prattes — Founder & CEO | ARNIX & Orbb Tecnologia</title>
+  <meta name="description" content="Página oficial de Gabriel Prattes, Founder & CEO da Prattes Technologies e Orbb Tecnologia, criador do ecossistema ARNIX Pricing.">
+  <link rel="icon" type="image/png" href="img/arnix-sgv.png">
+  <link rel="stylesheet" href="css/form.css">
+  <style>
+    .profile-hero {
+      text-align: center;
+      padding: 20px 10px 30px;
+      position: relative;
+    }
+    .avatar-wrap {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 50%, #06b6d4 100%);
+      padding: 3.5px;
+      box-shadow: 0 0 35px rgba(124, 58, 237, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      background: #0f172a;
+    }
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .profile-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--text-main);
+      margin: 0 0 6px 0;
+      letter-spacing: -0.02em;
+    }
+    .profile-role {
+      font-size: 1.05rem;
+      color: #38bdf8;
+      font-weight: 600;
+      margin: 0 0 16px 0;
+    }
+    .profile-bio {
+      max-width: 620px;
+      margin: 0 auto 28px;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+    .social-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin: 32px 0;
+    }
+    .social-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--bg-choice);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: var(--text-main);
+      transition: all var(--trans-fast);
+    }
+    .social-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      background: rgba(124, 58, 237, 0.08);
+    }
+    .social-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .social-info {
+      text-align: left;
+    }
+    .social-name {
+      font-size: 0.98rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .social-detail {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      word-break: break-all;
+    }
+    .venture-banner {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-top: 24px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow -->
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <div class="form-container" style="max-width: 820px;">
+    
+    <!-- Topbar -->
+    <header class="form-topbar">
+      <a href="index.html" class="brand-badge">
+        <div class="brand-icon">A</div>
+        <span>ARNIX <strong>Ecosystem</strong></span>
+      </a>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a href="index.html" class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem">📝 Pesquisa</a>
+        <a href="sobre.html" class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem">💡 Sobre o ARNIX</a>
+        <button class="theme-toggle-btn" id="themeToggle" type="button" aria-label="Alternar Tema">
+          <span>🌓</span>
+          <span id="themeToggleText">Tema</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Card -->
+    <main class="form-card" style="padding: 38px;">
+
+      <div class="profile-hero">
+        <div class="avatar-wrap">
+          <img src="img/gabriel_prattes.jpg" alt="Foto de Gabriel Prattes" class="avatar-img" onerror="this.onerror=null; this.src='https://github.com/GPrattes.png';">
+        </div>
+
+        <div class="verified-badge">
+          <span>✓</span> Fundador & Criador do Ecossistema
+        </div>
+
+        <h1 class="profile-title">Gabriel Prattes</h1>
+        <div class="profile-role">Founder & CEO • Prattes Technologies | Orbb Tecnologia</div>
+
+        <p class="profile-bio">
+          Arquiteto de software, empreendedor e idealizador do <strong>ARNIX</strong>. Focado em desenvolver soluções de alta performance em FinOps, SaaS inteligente de formação de preços e infraestrutura digital moderna.
+        </p>
+
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <a href="index.html" class="btn btn-primary" style="padding:12px 24px; text-decoration:none;">
+            <span>📝 Responder Pesquisa de Validação</span>
+          </a>
+          <a href="mailto:gprattesceo@orbb.com.br" class="btn btn-ghost" style="padding:12px 24px; text-decoration:none;">
+            <span>✉️ Entrar em Contato</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Links Oficiais e Redes -->
+      <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 24px 0 16px; text-align:left; border-top:1px solid var(--border); padding-top:24px;">
+        🌐 Canais Oficiais & Conexão Profissional
+      </h2>
+
+      <div class="social-cards-grid">
+        
+        <!-- GitHub -->
+        <a href="https://github.com/GPrattes" target="_blank" rel="noopener noreferrer" class="social-card">
+          <div class="social-icon-box">🐙</div>
+          <div class="social-info">
+            <div class="social-name">GitHub</div>
+            <div class="social-detail">@GPrattes</div>
+          </div>
+        </a>
+
+        <!-- LinkedIn -->
+        <a href="https://www.linkedin.com/in/gabriel-prattes/" target="_blank" rel="noopener noreferrer" class="social-card">
+          <div class="social-icon-box">💼</div>
+          <div class="social-info">
+            <div class="social-name">LinkedIn</div>
+            <div class="social-detail">Gabriel Prattes</div>
+          </div>
+        </a>
+
+        <!-- Email Corporativo -->
+        <a href="mailto:gprattesceo@orbb.com.br" class="social-card">
+          <div class="social-icon-box">✉️</div>
+          <div class="social-info">
+            <div class="social-name">E-mail Corporativo</div>
+            <div class="social-detail">gprattesceo@orbb.com.br</div>
+          </div>
+        </a>
+
+        
+
+      </div>
+
+      <!-- Venturing & Empresa -->
+      <div class="venture-banner">
+        <h3 style="font-size:1.1rem; font-weight:800; color:#c4b5fd; margin:0 0 8px 0; display:flex; align-items:center; gap:8px;">
+          <span>🚀</span> Prattes Technologies & Orbb Tecnologia
+        </h3>
+        <p style="margin:0 0 14px 0; font-size:0.88rem; color:var(--text-muted); line-height:1.6;">
+          A <strong>Prattes Technologies</strong> é o braço de inovação responsável pelo desenvolvimento de plataformas estratégicas como o <strong>ARNIX</strong>, enquanto a <strong>Orbb Tecnologia & Consultoria</strong> oferece soluções completas de infraestrutura e engenharia digital.
+        </p>
+        <div style="font-size:0.82rem; color:#94a3b8;">
+          📍 São Paulo, Brasil • Foco em SaaS, Cloud & FinOps
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="form-footer" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; align-items:center;">
+      <div>Gabriel Prattes • Prattes Technologies © 2026</div>
+      <div style="display:flex; gap:16px;">
+        <a href="index.html" style="color:var(--text-muted); text-decoration:none; font-size:0.85rem">Pesquisa</a>
+        <a href="sobre.html" style="color:var(--text-muted); text-decoration:none; font-size:0.85rem">Sobre o ARNIX</a>
+        
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="js/form.js"></script>
+</body>
+</html>

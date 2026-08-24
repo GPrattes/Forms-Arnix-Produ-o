@@ -7,6 +7,11 @@
     { "source": "/api/(.*)", "destination": "/api/index.py" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/dashboard.html", "destination": "/dashboard.html" },
+    { "source": "/sobre", "destination": "/sobre.html" },
+    { "source": "/sobre.html", "destination": "/sobre.html" },
+    { "source": "/fundador", "destination": "/fundador.html" },
+    { "source": "/fundador.html", "destination": "/fundador.html" },
+    { "source": "/gabriel-prattes", "destination": "/fundador.html" },
     { "source": "/pesquisa", "destination": "/index.html" },
     { "source": "/favicon.ico", "destination": "/img/arnix-sgv.png" },
     { "source": "/", "destination": "/index.html" }
