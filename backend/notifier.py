@@ -10,13 +10,24 @@ fundador (gprattesceo@orbb.com.br) e/ou Webhook com cabeçalhos autorizados.
 
 import os
 import json
+import smtplib
 import urllib.request
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timezone
 from typing import Dict, Any
 
 NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL", "gprattesceo@orbb.com.br").strip()
 WEBHOOK_URL = os.environ.get("WEBHOOK_NOTIFICATION_URL", "").strip()
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
+WEB3FORMS_KEY = os.environ.get("WEB3FORMS_KEY", "").strip()
+
+# Configurações SMTP (opcional via env para envio 100% direto)
+SMTP_HOST = os.environ.get("SMTP_HOST", "").strip()
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("SMTP_USER", "").strip()
+SMTP_PASS = os.environ.get("SMTP_PASS", "").strip()
+SMTP_FROM = os.environ.get("SMTP_FROM", NOTIFY_EMAIL).strip()
 
 def format_notification_body(resp: Dict[str, Any], total_count: int) -> str:
     agora = datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M:%S UTC')
@@ -57,18 +68,36 @@ Painel: https://forms-arnix-produ-o.vercel.app/dashboard
 """
 
 def send_notification(resp: Dict[str, Any], total_count: int) -> bool:
-    """Dispara a notificação através de canais redundantes."""
+    """Dispara a notificação através de múltiplos canais redundantes."""
     body_text = format_notification_body(resp, total_count)
     sent_successfully = False
 
-    # 1. Canal 1: Resend API (se token fornecido)
+    # 1. Canal 1: SMTP Direto (se configurado)
+    if SMTP_HOST and SMTP_USER and SMTP_PASS:
+        try:
+            msg = MIMEMultipart()
+            msg["From"] = SMTP_FROM or SMTP_USER
+            msg["To"] = NOTIFY_EMAIL
+            msg["Subject"] = f"🚀 [ARNIX] Nova Resposta Recebida! (Total: {total_count})"
+            msg.attach(MIMEText(body_text, "plain", "utf-8"))
+            
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=8) as server:
+                server.starttls()
+                server.login(SMTP_USER, SMTP_PASS)
+                server.sendmail(msg["From"], [NOTIFY_EMAIL], msg.as_string())
+            print(" [OK] Notificação enviada via SMTP Direto!")
+            sent_successfully = True
+        except Exception as e:
+            print(f" [!] Aviso SMTP: {e}")
+
+    # 2. Canal 2: Resend API (se token fornecido)
     if RESEND_API_KEY and NOTIFY_EMAIL:
         try:
             url = "https://api.resend.com/emails"
             payload = {
                 "from": "ARNIX Research <onboarding@resend.dev>",
                 "to": [NOTIFY_EMAIL],
-                "subject": f"🚀 [ARNIX] Nova Resposta Recebida! (Total: {total_count} respondentes)",
+                "subject": f"🚀 [ARNIX] Nova Resposta Recebida! (Total: {total_count})",
                 "text": body_text
             }
             req = urllib.request.Request(
@@ -87,7 +116,7 @@ def send_notification(resp: Dict[str, Any], total_count: int) -> bool:
         except Exception as e:
             print(f" [!] Aviso Resend: {e}")
 
-    # 2. Canal 2: Webhook (Discord / Slack / Telegram / Zapier)
+    # 3. Canal 3: Webhook (Discord / Slack / Telegram / Zapier)
     if WEBHOOK_URL:
         try:
             req = urllib.request.Request(
@@ -104,12 +133,14 @@ def send_notification(resp: Dict[str, Any], total_count: int) -> bool:
         except Exception as e:
             print(f" [!] Aviso Webhook: {e}")
 
-    # 3. Canal 3: FormSubmit Cloud Gateway (Com cabeçalhos canônicos da Vercel)
+    # 4. Canal 4: FormSubmit Cloud Gateway (Com flags anti-spam e template limpo)
     if NOTIFY_EMAIL:
         try:
             url = f"https://formsubmit.co/ajax/{NOTIFY_EMAIL}"
             payload = {
                 "_subject": f"🚀 [ARNIX] Nova Resposta de Pesquisa! (Total: {total_count})",
+                "_captcha": "false",
+                "_template": "table",
                 "Total_Respondentes": total_count,
                 "Cargo_Relacao": resp.get("relacao_negocio", "N/A"),
                 "Porte_Empresa": resp.get("porte_negocio", "N/A"),
@@ -124,8 +155,7 @@ def send_notification(resp: Dict[str, Any], total_count: int) -> bool:
                 "Utilizaria_Ferramenta": resp.get("utilizaria_ferramenta", "N/A"),
                 "Frequencia_Uso": resp.get("frequencia_uso", "N/A"),
                 "Disposicao_Pagamento": resp.get("disposicao_pagamento", "N/A"),
-                "Lead_Contato": resp.get("lead_contato") or "Anônimo",
-                "_template": "table"
+                "Lead_Contato": resp.get("lead_contato") or "Anônimo"
             }
             req = urllib.request.Request(
                 url,
@@ -145,5 +175,27 @@ def send_notification(resp: Dict[str, Any], total_count: int) -> bool:
                     sent_successfully = True
         except Exception as e:
             print(f" [!] FormSubmit Log: {e}")
+
+    # 5. Canal 5: Web3Forms (se chave presente)
+    if WEB3FORMS_KEY and NOTIFY_EMAIL:
+        try:
+            url = "https://api.web3forms.com/submit"
+            payload = {
+                "access_key": WEB3FORMS_KEY,
+                "subject": f"🚀 [ARNIX] Nova Resposta! (Total: {total_count})",
+                "message": body_text,
+                "to_email": NOTIFY_EMAIL
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json", "Accept": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=5) as res:
+                if res.status in (200, 201):
+                    print(" [OK] Notificação enviada via Web3Forms!")
+                    sent_successfully = True
+        except Exception as e:
+            print(f" [!] Aviso Web3Forms: {e}")
 
     return sent_successfully

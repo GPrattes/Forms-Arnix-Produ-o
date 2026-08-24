@@ -230,6 +230,7 @@ async function submitSurvey() {
       },
       body: JSON.stringify({
         _subject: `🚀 [ARNIX Research] Nova Resposta Recebida! (${surveyData.segmento})`,
+        _captcha: "false",
         Cargo_Relacao: surveyData.relacao_negocio,
         Porte_Empresa: surveyData.porte_negocio,
         Segmento: surveyData.segmento,
