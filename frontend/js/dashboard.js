@@ -86,8 +86,12 @@ async function loadDataAndRender() {
     });
     if (res.ok) {
       allResponses = await res.json();
+      localStorage.setItem('arnix_survey_responses', JSON.stringify(allResponses));
     } else {
-      throw new Error('Falha autenticação API ou fallback');
+      const local = localStorage.getItem('arnix_survey_responses');
+      if (local) {
+        allResponses = JSON.parse(local);
+      }
     }
   } catch (e) {
     const local = localStorage.getItem('arnix_survey_responses');
