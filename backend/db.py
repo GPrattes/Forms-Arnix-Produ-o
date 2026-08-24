@@ -32,9 +32,17 @@ DB_URL = (
 # Varredura dinâmica para qualquer prefixo customizado gerado pela Vercel
 if not DB_URL:
     for k, v in os.environ.items():
-        if k.endswith("_URL") and isinstance(v, str) and ("postgres" in v or "postgresql" in v):
+        if k.endswith("_URL") and isinstance(v, str) and ("postgres" in v or "postgresql" in v or "neon" in v.lower()):
             DB_URL = v
+            print(f" [DB] Encontrada variável dinâmica: {k}")
             break
+
+# Log de diagnóstico de conexão
+if DB_URL:
+    print(f" [DB] URL detectada ({DB_URL[:25]}...{DB_URL[-15:]})")
+else:
+    env_keys = [k for k in os.environ.keys() if "POSTGRES" in k or "DATABASE" in k or "ARMAZENAR" in k or "NEON" in k or "URL" in k]
+    print(f" [DB] AVISO: Nenhuma URL de Postgres encontrada! Variáveis candidatas: {env_keys}")
 
 # Normaliza postgres:// para postgresql:// para compatibilidade com psycopg2
 if DB_URL.startswith("postgres://"):
@@ -42,6 +50,8 @@ if DB_URL.startswith("postgres://"):
 
 IS_POSTGRES = bool(DB_URL and ("postgresql" in DB_URL or "postgres" in DB_URL))
 IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+
+print(f" [DB] IS_POSTGRES={IS_POSTGRES}, IS_VERCEL={IS_VERCEL}")
 
 if IS_VERCEL:
     SQLITE_DB_PATH = "/tmp/arnix_respostas.db"

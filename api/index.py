@@ -35,6 +35,7 @@ if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 from db import insert_resposta, get_all_respostas, clear_all_respostas
+import db as db_module
 
 try:
     from notifier import send_notification
@@ -159,6 +160,60 @@ async def login_admin(req: AdminAuthRequest):
     if req.password in VALID_ADMIN_KEYS:
         return {"status": "autenticado", "token": req.password, "usuario": "Rafael Prattes (Admin)"}
     raise HTTPException(status_code=401, detail="Chave Mestre de Administrador Incorreta.")
+
+# ── ROTA DE DIAGNÓSTICO DO BANCO (🔒 EXCLUSIVO DO ADMINISTRADOR) ──
+@app.get("/api/debug", dependencies=[Depends(verify_admin_token)])
+@app.get("/api/index.py/debug", dependencies=[Depends(verify_admin_token)])
+async def diagnostico_banco():
+    """Retorna diagnóstico completo do estado de conexão do banco de dados."""
+    import os as _os
+    env_db_keys = {k: v[:30] + "..." for k, v in _os.environ.items() 
+                   if any(x in k.upper() for x in ["POSTGRES", "DATABASE", "ARMAZENAR", "NEON"])}
+    
+    pg_test = "NÃO TESTADO"
+    pg_count = 0
+    if db_module.IS_POSTGRES:
+        try:
+            conn = db_module.get_postgres_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*) as total FROM respostas_pesquisa;")
+            row = cur.fetchone()
+            pg_count = row["total"] if row else 0
+            cur.close()
+            conn.close()
+            pg_test = f"CONECTADO - {pg_count} registros"
+        except Exception as e:
+            pg_test = f"ERRO: {str(e)}"
+    
+    sqlite_test = "NÃO TESTADO"
+    sqlite_count = 0
+    try:
+        import sqlite3
+        sconn = sqlite3.connect(db_module.SQLITE_DB_PATH)
+        scur = sconn.cursor()
+        scur.execute("SELECT COUNT(*) FROM respostas_pesquisa;")
+        sqlite_count = scur.fetchone()[0]
+        sconn.close()
+        sqlite_test = f"CONECTADO - {sqlite_count} registros"
+    except Exception as e:
+        sqlite_test = f"ERRO: {str(e)}"
+    
+    all_data = get_all_respostas()
+    
+    return {
+        "is_postgres": db_module.IS_POSTGRES,
+        "is_vercel": db_module.IS_VERCEL,
+        "db_url_detected": bool(db_module.DB_URL),
+        "db_url_preview": db_module.DB_URL[:40] + "..." if db_module.DB_URL else "VAZIO",
+        "env_db_vars": env_db_keys,
+        "postgres_test": pg_test,
+        "postgres_count": pg_count,
+        "sqlite_path": db_module.SQLITE_DB_PATH,
+        "sqlite_test": sqlite_test,
+        "sqlite_count": sqlite_count,
+        "get_all_respostas_count": len(all_data),
+        "diagnostico": "POSTGRES ATIVO ✅" if db_module.IS_POSTGRES else "⚠️ USANDO SQLITE TEMPORÁRIO (dados não persistem entre invocações Serverless!)"
+    }
 
 # ── 1. INGESTÃO PÚBLICA (ABERTO PARA O PÚBLICO COM ANTI-DUPLICAÇÃO)
 @app.post("/api/respostas", status_code=201)
