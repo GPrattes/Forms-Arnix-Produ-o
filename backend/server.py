@@ -41,6 +41,7 @@ from db import insert_resposta, get_all_respostas
 # ── SCHEMAS PYDANTIC ─────────────────────────────────────────
 class RespostaSurvey(BaseModel):
     id: Optional[str] = None
+    client_uuid: Optional[str] = None
     relacao_negocio: str
     porte_negocio: str
     segmento: str
@@ -151,8 +152,21 @@ async def criar_resposta(resposta: RespostaSurvey):
     payload["id"] = resp_id
     payload["criado_em"] = criado_em
 
-    insert_resposta(payload)
-    return {"status": "sucesso", "id": resp_id, "mensagem": "Resposta registrada com sucesso!"}
+    result = insert_resposta(payload)
+    if result.get("duplicado"):
+        return {
+            "status": "sucesso",
+            "id": result.get("id"),
+            "duplicado": True,
+            "mensagem": "Sua resposta já havia sido computada anteriormente! Agradecemos a participação."
+        }
+
+    return {
+        "status": "sucesso",
+        "id": resp_id,
+        "duplicado": False,
+        "mensagem": "Resposta registrada com sucesso!"
+    }
 
 # ── 2. CONSULTA DO BANCO (🔒 EXCLUSIVO DO ADMINISTRADOR) ──────
 @app.get("/api/respostas", dependencies=[Depends(verify_admin_token)])

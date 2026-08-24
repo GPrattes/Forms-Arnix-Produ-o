@@ -125,6 +125,7 @@ if os.path.exists(IMG_DIR):
 # ── SCHEMAS PYDANTIC ─────────────────────────────────────────
 class RespostaSurvey(BaseModel):
     id: Optional[str] = None
+    client_uuid: Optional[str] = None
     relacao_negocio: str
     porte_negocio: str
     segmento: str
@@ -154,7 +155,7 @@ async def login_admin(req: AdminAuthRequest):
         return {"status": "autenticado", "token": req.password, "usuario": "Rafael Prattes (Admin)"}
     raise HTTPException(status_code=401, detail="Chave Mestre de Administrador Incorreta.")
 
-# ── 1. INGESTÃO PÚBLICA (ABERTO PARA O PÚBLICO RESPONDER) ─────
+# ── 1. INGESTÃO PÚBLICA (ABERTO PARA O PÚBLICO COM ANTI-DUPLICAÇÃO)
 @app.post("/api/respostas", status_code=201)
 @app.post("/respostas", status_code=201)
 async def criar_resposta_serverless(resposta: RespostaSurvey):
@@ -166,8 +167,21 @@ async def criar_resposta_serverless(resposta: RespostaSurvey):
     payload["id"] = resp_id
     payload["criado_em"] = criado_em
 
-    insert_resposta(payload)
-    return {"status": "sucesso", "id": resp_id, "mensagem": "Resposta registrada com sucesso no Vercel Postgres!"}
+    result = insert_resposta(payload)
+    if result.get("duplicado"):
+        return {
+            "status": "sucesso",
+            "id": result.get("id"),
+            "duplicado": True,
+            "mensagem": "Sua resposta já havia sido computada anteriormente! Agradecemos a participação."
+        }
+
+    return {
+        "status": "sucesso",
+        "id": resp_id,
+        "duplicado": False,
+        "mensagem": "Resposta registrada com sucesso no banco de dados!"
+    }
 
 # ── 2. CONSULTA DO BANCO (🔒 EXCLUSIVO DO ADMINISTRADOR) ──────
 @app.get("/api/respostas", dependencies=[Depends(verify_admin_token)])

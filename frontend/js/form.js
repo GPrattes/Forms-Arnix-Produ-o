@@ -33,15 +33,27 @@ const surveyData = {
   disposicao_pagamento: '',
   lead_contato: '',
 
-  // Metadados
+  // Metadados & Anti-duplicação
+  client_uuid: '',
   criado_em: new Date().toISOString()
 };
 
 let currentStepIndex = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
+  initDeviceUUID();
   initTheme();
 });
+
+/* ── 0. IDENTIFICADOR ÚNICO DE DISPOSITIVO (ANTI-DUPLICAÇÃO) ─ */
+function initDeviceUUID() {
+  let uuid = localStorage.getItem('arnix_device_uuid');
+  if (!uuid) {
+    uuid = 'dev_' + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
+    localStorage.setItem('arnix_device_uuid', uuid);
+  }
+  surveyData.client_uuid = uuid;
+}
 
 /* ── 1. NAVEGAÇÃO ENTRE ETAPAS ────────────────────────────── */
 function nextStep(stepIndex) {
@@ -187,6 +199,12 @@ async function submitSurvey() {
     submitBtn.innerHTML = '<span>Salvando respostas...</span>';
   }
 
+  // Previne envio duplicado se o usuário já tiver enviado
+  if (localStorage.getItem('arnix_survey_submitted') === 'true') {
+    nextStep(6);
+    return;
+  }
+
   try {
     // 1. Tenta enviar para o backend FastAPI (se estiver ativo)
     const response = await fetch('/api/respostas', {
@@ -198,6 +216,9 @@ async function submitSurvey() {
     if (!response.ok) {
       throw new Error('Falha no servidor');
     }
+    
+    // Marca como respondido com sucesso
+    localStorage.setItem('arnix_survey_submitted', 'true');
   } catch (err) {
     // 2. Fallback offline no localStorage (garante que NUNCA perde uma resposta!)
     const localStore = JSON.parse(localStorage.getItem('arnix_survey_responses') || '[]');
@@ -206,6 +227,7 @@ async function submitSurvey() {
       id: 'resp_' + Date.now().toString(36)
     });
     localStorage.setItem('arnix_survey_responses', JSON.stringify(localStore));
+    localStorage.setItem('arnix_survey_submitted', 'true');
   }
 
   // Se o usuário preencheu o e-mail/WhatsApp, exibe o cartão de confirmação de lembrete
