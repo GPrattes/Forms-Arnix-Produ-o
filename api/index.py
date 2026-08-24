@@ -94,18 +94,22 @@ async def vercel_request_logger(request: Request, call_next):
     print(f" [RES] {method} {path} -> {response.status_code}")
     return response
 
-# ── ROTAS RAIZ DA API (GET /api/index.py ou GET /api) ──────────
 @app.get("/api")
 @app.get("/api/")
 @app.get("/api/index")
 @app.get("/api/index.py")
-async def api_root_info():
-    """Retorna informações e status da API."""
+async def api_root_info(request: Request):
+    """Retorna informações, status da API e diagnóstico de cabeçalhos."""
+    hdrs = {k: v for k, v in request.headers.items()}
     return {
         "status": "online",
         "service": "ARNIX Research Serverless API",
         "is_postgres": db_module.IS_POSTGRES,
         "is_vercel": db_module.IS_VERCEL,
+        "path": request.url.path,
+        "scope_path": request.scope.get("path"),
+        "raw_path": str(request.scope.get("raw_path")),
+        "headers": hdrs,
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 

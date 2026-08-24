@@ -4,7 +4,6 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/dashboard.html", "destination": "/dashboard.html" },
     { "source": "/sobre", "destination": "/sobre.html" },
