@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesquisa sobre Precificação em Pequenos Negócios — ARNIX</title>
+  <meta name="description" content="Pesquisa acadêmica e empreendedora sobre métodos de precificação, dores e desafios financeiros em pequenos negócios.">
+  <link rel="icon" type="image/png" href="img/arnix-sgv.png">
+  <link rel="stylesheet" href="css/form.css">
+</head>
+<body>
+
+  <!-- Ambient Glow Background -->
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <div class="form-container">
+    
+    <!-- Topbar -->
+    <div class="form-topbar">
+      <a href="#" class="brand-badge">
+        <div class="brand-icon">A</div>
+        <span>ARNIX <strong>Research</strong></span>
+      </a>
+
+      <button class="theme-toggle-btn" id="themeToggle" type="button" aria-label="Alternar Tema">
+        <span>🌓</span>
+        <span id="themeToggleText">Modo Claro</span>
+      </button>
+    </div>
+
+    <!-- Progress Bar (Steps 1 to 5) -->
+    <div class="progress-section" id="progressSection" style="display:none">
+      <div class="progress-header">
+        <span id="progressStepLabel">Etapa 1 de 5</span>
+        <span id="progressPercentLabel">20% concluído</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <!-- Main Card -->
+    <main class="form-card">
+      <form id="surveyForm">
+
+        <!-- ── ETAPA 0: PÁGINA INICIAL / APRESENTAÇÃO ──────────────── -->
+        <div class="step-pane active" id="step-0">
+          <div class="step-tag">💡 Validação & Estudo de Mercado</div>
+          <h1 class="step-title">Pesquisa sobre Precificação em Pequenos Negócios</h1>
+          <p class="step-desc">
+            Esta pesquisa tem como objetivo mapear como empreendedores, gestores e autônomos calculam seus preços de venda, suas principais dificuldades e o impacto financeiro no negócio.
+          </p>
+
+          <div class="welcome-pills">
+            <div class="pill-feature">⏱️ <strong>~3 minutos</strong> de duração</div>
+            <div class="pill-feature">🔒 <strong>100% Anônimo</strong></div>
+            <div class="pill-feature">🎯 <strong>Foco Empreendedor & Prático</strong></div>
+          </div>
+
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:28px; line-height:1.6">
+            Suas respostas nos ajudarão a entender a viabilidade de novas ferramentas simplificadas para gestão e formação de preços.
+          </p>
+
+          <button type="button" class="btn btn-primary" onclick="nextStep(1)" style="font-size:1.05rem; padding:15px 32px;">
+            <span>Começar Pesquisa</span>
+            <span>→</span>
+          </button>
+        </div>
+
+        <!-- ── ETAPA 1: PERFIL DO RESPONDENTE ─────────────────────── -->
+        <div class="step-pane" id="step-1">
+          <div class="step-tag">Etapa 1 de 5 • Perfil do Negócio</div>
+          <h2 class="step-title">Conte-nos sobre sua atuação profissional</h2>
+          <p class="step-desc">Esses dados nos ajudam a cruzar as respostas por segmento e porte de empresa.</p>
+
+          <!-- Pergunta 1.1 -->
+          <div style="margin-bottom: 28px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:12px; display:block">
+              1. Qual a sua relação com um negócio?
+            </label>
+            <div class="choices-grid" data-name="relacao_negocio">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'relacao_negocio', 'Proprietário(a)')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Sou proprietário(a) / Fundador(a)</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'relacao_negocio', 'Sócio(a)')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Sou sócio(a)</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'relacao_negocio', 'Administração')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Trabalho na administração / Gestão</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'relacao_negocio', 'Financeiro')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Trabalho no financeiro / Controladoria</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'relacao_negocio', 'Comercial')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Trabalho no comercial / Vendas</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'relacao_negocio', 'Autônomo/Freelancer')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Sou autônomo(a) / Freelancer / Prestador de Serviço</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'relacao_negocio', 'Outro')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Outro</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pergunta 1.2 -->
+          <div style="margin-bottom: 28px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:12px; display:block">
+              2. Qual o porte aproximado do negócio?
+            </label>
+            <div class="choices-grid" data-name="porte_negocio">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'porte_negocio', 'Trabalho sozinho')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Trabalho sozinho(a)</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'porte_negocio', 'MEI')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">MEI (Microempreendedor Individual)</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'porte_negocio', 'Microempresa')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Microempresa (até 9 funcionários)</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'porte_negocio', 'Pequena empresa')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Pequena empresa (10 a 49 funcionários)</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'porte_negocio', 'Médio/Grande')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Médio ou Grande Porte (50+ funcionários)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pergunta 1.3 -->
+          <div style="margin-bottom: 12px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:12px; display:block">
+              3. Qual o segmento principal de atuação?
+            </label>
+            <div class="choices-grid" data-name="segmento">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'segmento', 'Serviços')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Serviços em Geral</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'segmento', 'Tecnologia')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Tecnologia & Desenvolvimento de Software</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'segmento', 'Comércio')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Comércio / Varejo / E-commerce</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'segmento', 'Agência/Consultoria')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Agência, Marketing & Consultoria</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'segmento', 'Alimentação')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Alimentação & Gastronomia</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'segmento', 'Indústria')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Indústria / Fabricação</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'segmento', 'Outro')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Outro</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" onclick="nextStep(0)">← Voltar</button>
+            <button type="button" class="btn btn-primary" onclick="validateAndNext(1, 2)">Avançar →</button>
+          </div>
+        </div>
+
+        <!-- ── ETAPA 2: DIAGNÓSTICO DO PROBLEMA ───────────────────── -->
+        <div class="step-pane" id="step-2">
+          <div class="step-tag">Etapa 2 de 5 • Método Atual & Dores</div>
+          <h2 class="step-title">Como funciona a sua precificação hoje?</h2>
+          <p class="step-desc">Queremos entender o método que você utiliza e onde estão os principais gargalos.</p>
+
+          <!-- Pergunta 2.1 -->
+          <div style="margin-bottom: 28px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:12px; display:block">
+              4. Como você define atualmente o preço de um produto ou serviço?
+            </label>
+            <div class="choices-grid" data-name="metodo_atual">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'metodo_atual', 'Excel/Planilha')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Uso Excel ou Planilha (Google Sheets)</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'metodo_atual', 'Manualmente')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Faço manualmente / Papel ou cabeça</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'metodo_atual', 'Sistema')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Uso um software ERP ou sistema especializado</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'metodo_atual', 'Concorrência')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Vou pelo preço da concorrência</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'metodo_atual', 'Experiência')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Defino por intuição / Experiência empírica</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pergunta 2.2 (Escala 1 a 5) -->
+          <div style="margin-bottom: 28px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:6px; display:block">
+              5. Com que frequência você tem dificuldade para definir um preço adequado?
+            </label>
+            <div class="rating-scale-wrap" data-name="frequencia_dificuldade">
+              <button type="button" class="rating-btn" onclick="selectRating('frequencia_dificuldade', 1, this)">1</button>
+              <button type="button" class="rating-btn" onclick="selectRating('frequencia_dificuldade', 2, this)">2</button>
+              <button type="button" class="rating-btn" onclick="selectRating('frequencia_dificuldade', 3, this)">3</button>
+              <button type="button" class="rating-btn" onclick="selectRating('frequencia_dificuldade', 4, this)">4</button>
+              <button type="button" class="rating-btn" onclick="selectRating('frequencia_dificuldade', 5, this)">5</button>
+            </div>
+            <div class="rating-scale-legend">
+              <span>1 = Nunca tenho dúvida</span>
+              <span>3 = Às vezes</span>
+              <span>5 = Sempre é difícil</span>
+            </div>
+          </div>
+
+          <!-- Pergunta 2.3 (Múltipla Escolha) -->
+          <div style="margin-bottom: 12px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:6px; display:block">
+              6. Quais são suas maiores dificuldades? (Selecione todas que se aplicam)
+            </label>
+            <div class="choices-grid">
+              <div class="choice-card" onclick="toggleMultiChoice(this, 'dificuldades', 'Calcular custos diretos')">
+                <div class="choice-checkbox"></div>
+                <div class="choice-label">Calcular custos diretos e horas trabalhadas</div>
+              </div>
+              <div class="choice-card" onclick="toggleMultiChoice(this, 'dificuldades', 'Margem de lucro real')">
+                <div class="choice-checkbox"></div>
+                <div class="choice-label">Definir e garantir a margem de lucro real</div>
+              </div>
+              <div class="choice-card" onclick="toggleMultiChoice(this, 'dificuldades', 'Impostos e encargos')">
+                <div class="choice-checkbox"></div>
+                <div class="choice-label">Embutir impostos e encargos fiscais corretamente</div>
+              </div>
+              <div class="choice-card" onclick="toggleMultiChoice(this, 'dificuldades', 'Custos indiretos')">
+                <div class="choice-checkbox"></div>
+                <div class="choice-label">Absorver custos fixos e operacionais (aluguel, ferramentas, etc.)</div>
+              </div>
+              <div class="choice-card" onclick="toggleMultiChoice(this, 'dificuldades', 'Saber quanto ganho')">
+                <div class="choice-checkbox"></div>
+                <div class="choice-label">Saber com clareza quanto realmente estou lucrando</div>
+              </div>
+              <div class="choice-card" onclick="toggleMultiChoice(this, 'dificuldades', 'Alterar preços rápido')">
+                <div class="choice-checkbox"></div>
+                <div class="choice-label">Alterar e recalcular preços rapidamente quando custos mudam</div>
+              </div>
+              <div class="choice-card" onclick="toggleMultiChoice(this, 'dificuldades', 'Pressão da concorrência')">
+                <div class="choice-checkbox"></div>
+                <div class="choice-label">Pressão da concorrência cobrando muito abaixo</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" onclick="nextStep(1)">← Voltar</button>
+            <button type="button" class="btn btn-primary" onclick="validateAndNext(2, 3)">Avançar →</button>
+          </div>
+        </div>
+
+        <!-- ── ETAPA 3: IMPACTO FINANCEIRO & OPERACIONAL ───────────── -->
+        <div class="step-pane" id="step-3">
+          <div class="step-tag">Etapa 3 de 5 • Impacto no Negócio</div>
+          <h2 class="step-title">O impacto das decisões de preço</h2>
+          <p class="step-desc">Descubra como a precificação afetou vendas passadas e o tempo gasto na rotina.</p>
+
+          <!-- Pergunta 3.1 -->
+          <div style="margin-bottom: 24px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:10px; display:block">
+              7. Você já deixou de fechar uma venda por passar um preço alto demais?
+            </label>
+            <div class="choices-grid" data-name="perdeu_venda_preco_alto">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'perdeu_venda_preco_alto', 'Sim')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Sim, já aconteceu</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'perdeu_venda_preco_alto', 'Não')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Não, nunca aconteceu</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'perdeu_venda_preco_alto', 'Não sei')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Não tenho certeza</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pergunta 3.2 -->
+          <div style="margin-bottom: 24px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:10px; display:block">
+              8. Você já teve prejuízo ou 'pagou para trabalhar' por cobrar abaixo do necessário?
+            </label>
+            <div class="choices-grid" data-name="teve_prejuizo_preco_baixo">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'teve_prejuizo_preco_baixo', 'Sim')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Sim, já tive prejuízo</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'teve_prejuizo_preco_baixo', 'Não')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Não, sempre cobro acima dos custos</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'teve_prejuizo_preco_baixo', 'Não sei')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Não tenho como saber com exatidão</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pergunta 3.3 -->
+          <div style="margin-bottom: 24px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:10px; display:block">
+              9. Quanto tempo você gasta em média para precificar um produto ou proposta?
+            </label>
+            <div class="choices-grid" data-name="tempo_gasto">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'tempo_gasto', 'Menos de 5 min')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Menos de 5 minutos</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'tempo_gasto', '5-15 min')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">De 5 a 15 minutos</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'tempo_gasto', '15-30 min')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">De 15 a 30 minutos</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'tempo_gasto', '30-60 min')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">De 30 a 60 minutos</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'tempo_gasto', 'Mais de 1 hora')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Mais de 1 hora</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pergunta 3.4 (Escala 1 a 5) -->
+          <div style="margin-bottom: 12px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:6px; display:block">
+              10. De 1 a 5, quão importante você considera melhorar seu processo de precificação?
+            </label>
+            <div class="rating-scale-wrap" data-name="importancia_melhorar">
+              <button type="button" class="rating-btn" onclick="selectRating('importancia_melhorar', 1, this)">1</button>
+              <button type="button" class="rating-btn" onclick="selectRating('importancia_melhorar', 2, this)">2</button>
+              <button type="button" class="rating-btn" onclick="selectRating('importancia_melhorar', 3, this)">3</button>
+              <button type="button" class="rating-btn" onclick="selectRating('importancia_melhorar', 4, this)">4</button>
+              <button type="button" class="rating-btn" onclick="selectRating('importancia_melhorar', 5, this)">5</button>
+            </div>
+            <div class="rating-scale-legend">
+              <span>1 = Pouco importante</span>
+              <span>3 = Moderado</span>
+              <span>5 = Prioridade Crítica</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" onclick="nextStep(2)">← Voltar</button>
+            <button type="button" class="btn btn-primary" onclick="validateAndNext(3, 4)">Avançar →</button>
+          </div>
+        </div>
+
+        <!-- ── ETAPA 4: APRESENTAÇÃO DO ARNIX (O PULO DO GATO) ────── -->
+        <div class="step-pane" id="step-4">
+          <div class="step-tag">Etapa 4 de 5 • Apresentação de Solução</div>
+          <h2 class="step-title">Conheça uma nova abordagem</h2>
+          <p class="step-desc">Imagine uma ferramenta inteligente criada para resolver exatamente essas dores.</p>
+
+          <!-- Showcase do ARNIX -->
+          <div class="solution-showcase-box">
+            <div class="solution-badge">⚡ ARNIX SMART PRICING</div>
+            <h3 class="solution-title">Motor Inteligente de Precificação & FinOps</h3>
+            <p class="solution-desc">
+              O <strong>ARNIX</strong> é uma plataforma simplificada que calcula automaticamente o preço ideal de venda considerando <strong>custos diretos, horas, impostos, despesas fixas e margem de lucro garantida</strong>, além de gerar propostas comerciais em PDF com 1 clique.
+            </p>
+            <div class="solution-features">
+              <div class="solution-feat-item"><span>✓</span> Cálculo em segundos sem planilhas</div>
+              <div class="solution-feat-item"><span>✓</span> Alerta automático de margem crítica</div>
+              <div class="solution-feat-item"><span>✓</span> Simulação de urgência e riscos</div>
+              <div class="solution-feat-item"><span>✓</span> Propostas profissionais em PDF</div>
+            </div>
+          </div>
+
+          <!-- Pergunta 4.1 -->
+          <div style="margin-bottom: 12px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:12px; display:block">
+              11. Uma solução como o ARNIX resolveria os problemas de precificação do seu negócio?
+            </label>
+            <div class="choices-grid" data-name="resolveria_problema">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'resolveria_problema', 'Sim, resolveria bastante')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Sim, resolveria bastante</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'resolveria_problema', 'Sim, parcialmente')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Sim, parcialmente</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'resolveria_problema', 'Talvez')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Talvez / Depende dos recursos</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'resolveria_problema', 'Pouco')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Pouco</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'resolveria_problema', 'Não')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Não resolveria</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" onclick="nextStep(3)">← Voltar</button>
+            <button type="button" class="btn btn-primary" onclick="validateAndNext(4, 5)">Avançar →</button>
+          </div>
+        </div>
+
+        <!-- ── ETAPA 5: VALIDAÇÃO COMERCIAL & PREÇO ────────────────── -->
+        <div class="step-pane" id="step-5">
+          <div class="step-tag">Etapa 5 de 5 • Validação Comercial</div>
+          <h2 class="step-title">Adesão & Disposição de Pagamento</h2>
+          <p class="step-desc">Última etapa! Suas respostas nos ajudam a calibrar o modelo comercial do ARNIX.</p>
+
+          <!-- Pergunta 5.1 -->
+          <div style="margin-bottom: 24px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:10px; display:block">
+              12. Você utilizaria uma ferramenta como o ARNIX no seu dia a dia?
+            </label>
+            <div class="choices-grid" data-name="utilizaria_ferramenta">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'utilizaria_ferramenta', 'Sim, com certeza')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Sim, com certeza</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'utilizaria_ferramenta', 'Provavelmente sim')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Provavelmente sim</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'utilizaria_ferramenta', 'Talvez')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Talvez</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'utilizaria_ferramenta', 'Provavelmente não')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Provavelmente não</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'utilizaria_ferramenta', 'Não')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Não utilizaria</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pergunta 5.2 -->
+          <div style="margin-bottom: 24px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:10px; display:block">
+              13. Com que frequência você utilizaria a ferramenta?
+            </label>
+            <div class="choices-grid" data-name="frequencia_uso">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'frequencia_uso', 'Diariamente')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Diariamente</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'frequencia_uso', 'Algumas vezes por semana')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Algumas vezes por semana</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'frequencia_uso', 'Algumas vezes por mês')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Algumas vezes por mês (ao enviar propostas)</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'frequencia_uso', 'Raramente')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Raramente / Apenas esporádico</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pergunta 5.3 (Disposição a Pagar) -->
+          <div style="margin-bottom: 24px;">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:10px; display:block">
+              14. Quanto você estaria disposto(a) a pagar mensalmente por essa ferramenta?
+            </label>
+            <div class="choices-grid" data-name="disposicao_pagamento">
+              <div class="choice-card" onclick="selectSingleChoice(this, 'disposicao_pagamento', 'Apenas Gratuito')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Apenas se fosse gratuito</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'disposicao_pagamento', 'Até R$ 19,90/mês')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Até R$ 19,90 / mês</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'disposicao_pagamento', 'R$ 20 a 39,90/mês')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">R$ 20,00 a R$ 39,90 / mês</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'disposicao_pagamento', 'R$ 40 a 59,90/mês')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">R$ 40,00 a R$ 59,90 / mês <em>(Faixa Recomendada)</em></div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'disposicao_pagamento', 'R$ 60 a 99,90/mês')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">R$ 60,00 a R$ 99,90 / mês</div>
+              </div>
+              <div class="choice-card" onclick="selectSingleChoice(this, 'disposicao_pagamento', 'Mais de R$ 100/mês')">
+                <div class="choice-radio"></div>
+                <div class="choice-label">Mais de R$ 100,00 / mês</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pergunta 5.4 (Opcional - Lead Beta) -->
+          <div style="margin-bottom: 12px; padding: 18px; background:var(--bg-choice); border:1px solid var(--border); border-radius:var(--radius-md);">
+            <label class="step-desc" style="font-weight:600; color:var(--text-main); margin-bottom:4px; display:block">
+              🎁 (Opcional) Gostaria de testar o ARNIX gratuitamente no lançamento?
+            </label>
+            <span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:8px">
+              Deixe seu WhatsApp ou E-mail para receber um convite VIP de acesso antecipado:
+            </span>
+            <input type="text" class="form-input" id="lead_contato" placeholder="Ex: (11) 99999-9999 ou seu@email.com">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" onclick="nextStep(4)">← Voltar</button>
+            <button type="button" class="btn btn-primary" id="btnSubmitForm" onclick="submitSurvey()">
+              <span>Finalizar & Enviar Respostas</span>
+              <span>✓</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── ETAPA 6: TELA DE AGRADECIMENTO & SUCESSO ───────────── -->
+        <div class="step-pane" id="step-6">
+          <div class="success-screen">
+            <div class="success-icon-wrap">✓</div>
+            <h2 class="success-title">Muito obrigado pela contribuição!</h2>
+            <p class="success-desc">
+              Sua resposta foi registrada com sucesso e de forma 100% anônima. Ela é fundamental para calibrar o desenvolvimento do ARNIX e gerar dados reais para o nosso estudo de validação.
+            </p>
+
+            <div class="success-actions">
+              <a href="dashboard.html" class="btn btn-primary" style="text-decoration:none">
+                <span>📊 Ver Dashboard de Validação ao Vivo</span>
+              </a>
+              <button type="button" class="btn btn-ghost" onclick="location.reload()">
+                <span>Preencher Outra Resposta</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </main>
+
+    <!-- Footer note -->
+    <footer class="form-footer">
+      Pesquisa de Validação de Mercado • ARNIX Pricing & FinOps Engine © 2026
+    </footer>
+
+  </div>
+
+  <script src="js/form.js"></script>
+</body>
+</html>
