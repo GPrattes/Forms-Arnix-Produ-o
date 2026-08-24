@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sobre o ARNIX — Smart Pricing & FinOps Engine</title>
-  <meta name="description" content="Conheça o ecossistema ARNIX: motor inteligente de formação de preços, markup automatizado e cálculo de margem real de lucro para pequenas empresas e autônomos.">
+  <title>Sobre o ARNIX — Sistema Operacional de Inteligência Comercial & Precificação</title>
+  <meta name="description" content="Conheça a plataforma ARNIX: motor inteligente de formação de preços, FinOps comercial, cálculo de margem real de lucro e proteção contra prejuízos invisíveis.">
   <link rel="icon" type="image/png" href="img/arnix-sgv.png">
   <link rel="stylesheet" href="css/form.css">
   <style>
     .about-header {
       text-align: center;
-      margin-bottom: 36px;
+      margin-bottom: 32px;
     }
     .about-badge {
       display: inline-flex;
@@ -27,50 +27,167 @@
       letter-spacing: 0.05em;
       margin-bottom: 12px;
     }
-    .grid-features {
+    .slogan-box {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      text-align: center;
+      margin-bottom: 32px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+      margin: 28px 0;
+    }
+    .stat-box {
+      background: var(--bg-choice);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 14px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 1.85rem;
+      font-weight: 900;
+      color: #38bdf8;
+      margin-bottom: 4px;
+      font-family: inherit;
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      font-weight: 600;
+    }
+    .roi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      margin: 32px 0;
+      gap: 18px;
+      margin: 24px 0;
+    }
+    .roi-card-before {
+      background: rgba(244, 63, 94, 0.04);
+      border: 1.5px solid rgba(244, 63, 94, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: left;
+    }
+    .roi-card-after {
+      background: rgba(16, 185, 129, 0.04);
+      border: 1.5px solid rgba(16, 185, 129, 0.35);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: left;
+    }
+    .roi-tag-before {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .roi-tag-after {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .roi-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 0.86rem;
+    }
+    .roi-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+    .grid-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
     }
     .feat-card {
       background: var(--bg-choice);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 24px;
+      padding: 20px;
       transition: all var(--trans-fast);
-      position: relative;
-      overflow: hidden;
+      text-align: left;
     }
     .feat-card:hover {
       border-color: var(--primary);
-      transform: translateY(-3px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
     .feat-icon {
-      font-size: 2rem;
-      margin-bottom: 12px;
+      font-size: 1.7rem;
+      margin-bottom: 10px;
       display: inline-block;
     }
     .feat-title {
-      font-size: 1.1rem;
+      font-size: 1.02rem;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .feat-desc {
-      font-size: 0.88rem;
+      font-size: 0.84rem;
       color: var(--text-muted);
-      line-height: 1.6;
+      line-height: 1.55;
       margin: 0;
     }
+    .segment-pills-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 18px 0;
+    }
+    .segment-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--bg-choice);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
     .cta-banner {
-      background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
-      border: 1.5px solid rgba(139, 92, 246, 0.35);
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.18) 0%, rgba(59, 130, 246, 0.18) 100%);
+      border: 1.5px solid rgba(139, 92, 246, 0.4);
       border-radius: var(--radius-lg);
-      padding: 32px;
+      padding: 28px 24px;
       text-align: center;
-      margin-top: 40px;
+      margin-top: 32px;
     }
   </style>
 </head>
@@ -79,17 +196,17 @@
   <!-- Ambient Glow Background -->
   <div class="ambient-glow" aria-hidden="true"></div>
 
-  <div class="form-container" style="max-width: 880px;">
+  <div class="form-container" style="max-width: 900px;">
     
     <!-- Topbar -->
     <header class="form-topbar">
       <a href="index.html" class="brand-badge">
         <div class="brand-icon">A</div>
-        <span>ARNIX <strong>Pricing Platform</strong></span>
+        <span>ARNIX <strong>Ecosystem</strong></span>
       </a>
 
       <div style="display:flex; gap:10px; align-items:center;">
-        <a href="index.html" class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem">📝 Pesquisa</a>
+        <a href="index.html" class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem">📝 Responder Pesquisa</a>
         <a href="fundador.html" class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem">👤 Fundador</a>
         <button class="theme-toggle-btn" id="themeToggle" type="button" aria-label="Alternar Tema">
           <span>🌓</span>
@@ -99,82 +216,169 @@
     </header>
 
     <!-- Main Content Card -->
-    <main class="form-card" style="padding: 38px;">
+    <main class="form-card" style="padding: 36px 32px;">
 
+      <!-- Header -->
       <div class="about-header">
         <div class="about-badge">🚀 Ecossistema ARNIX • Prattes Technologies</div>
-        <h1 class="step-title" style="font-size: 2.2rem; margin-bottom: 12px;">
+        <h1 class="step-title" style="font-size: 2.1rem; margin-bottom: 10px;">
           O que é a Plataforma ARNIX?
         </h1>
-        <p class="step-desc" style="font-size: 1.05rem; max-width: 700px; margin: 0 auto;">
-          O <strong>ARNIX</strong> é um motor inteligente de <strong>Formação de Preços, FinOps e Gestão de Margem</strong> desenvolvido para eliminar o "achismo" financeiro de pequenas empresas, agências, prestadores de serviços e autônomos.
+        <p class="step-desc" style="font-size: 1rem; max-width: 720px; margin: 0 auto; line-height: 1.6;">
+          O <strong>ARNIX</strong> é o primeiro Sistema Operacional de <strong>Inteligência Comercial, Formação de Preços & FinOps</strong> projetado especificamente para pequenas empresas, prestadores de serviços, estúdios criativos e autônomos.
         </p>
       </div>
 
-      <!-- O Problema -->
-      <div style="padding: 22px; background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.25); border-radius: var(--radius-md); margin-bottom: 30px;">
-        <h3 style="color: #fb7185; font-size: 1.05rem; font-weight: 700; margin: 0 0 8px 0; display:flex; align-items:center; gap:8px;">
-          <span>⚠️</span> O Grande Desafio do Mercado Atual
-        </h3>
-        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
-          Mais de <strong>70% das micro e pequenas empresas</strong> precificam seus serviços com base na concorrência ou em contas rápidas de cabeça. O resultado? Vendas que geram prejuízo invisível, tempo excessivo montando propostas e constante insegurança ao negociar com clientes.
-        </p>
+      <!-- Slogan Banner -->
+      <div class="slogan-box">
+        "Tudo o que você precisa para calcular preços, gerar propostas e proteger sua margem de lucro com inteligência comercial e zero achismo."
       </div>
 
-      <!-- Como o ARNIX Funciona -->
-      <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 18px; display:flex; align-items:center; gap:8px;">
-        <span>⚡</span> Os 4 Pilares de Inteligência do ARNIX
+      <!-- Indicadores Verificáveis -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-number">15+</div>
+          <div class="stat-label">Motores de precificação para diferentes nichos</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">&lt; 10ms</div>
+          <div class="stat-label">Tempo de resposta dos cálculos server-side</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Auditoria imutável & conformidade LGPD</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">0%</div>
+          <div class="stat-label">Erros de fórmula ou planilhas corrompidas</div>
+        </div>
+      </div>
+
+      <!-- Comparativo ROI: Antes x Depois -->
+      <div style="margin: 32px 0 16px;">
+        <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px; text-align: left;">
+          ⚖️ Comparativo de Impacto: Por que mudar para a ARNIX?
+        </h2>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0 0 18px 0; text-align: left;">
+          Veja o abismo financeiro entre precificar por instinto e contar com inteligência comercial automatizada:
+        </p>
+
+        <div class="roi-grid">
+          <!-- ANTES -->
+          <div class="roi-card-before">
+            <div class="roi-tag-before">✕ Cenário Tradicional (Sem ARNIX)</div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 12px; color: #fb7185;">Precificação no Escuro</h3>
+            <ul class="roi-list" style="color: var(--text-muted);">
+              <li><span style="color:#f43f5e; font-weight:800;">✕</span> Planilhas de Excel com fórmulas manuais quebradas.</li>
+              <li><span style="color:#f43f5e; font-weight:800;">✕</span> Preço copiado da concorrência sem conhecer seus custos.</li>
+              <li><span style="color:#f43f5e; font-weight:800;">✕</span> Descontos por impulso que causam prejuízo invisível.</li>
+              <li><span style="color:#f43f5e; font-weight:800;">✕</span> Horas perdidas montando orçamentos manuais.</li>
+              <li><span style="color:#f43f5e; font-weight:800;">✕</span> Sensação constante de trabalhar muito e lucrar pouco.</li>
+            </ul>
+          </div>
+
+          <!-- DEPOIS -->
+          <div class="roi-card-after">
+            <div class="roi-tag-after">✔ Com a Plataforma ARNIX</div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 12px; color: #34d399;">Lucro Blindado & Previsível</h3>
+            <ul class="roi-list" style="color: var(--text-main);">
+              <li><span style="color:#10b981; font-weight:800;">✔</span> Motor server-side que apura custos diretos, indiretos e impostos.</li>
+              <li><span style="color:#10b981; font-weight:800;">✔</span> Preço ideal sugerido em milissegundos com margem garantida.</li>
+              <li><span style="color:#10b981; font-weight:800;">✔</span> Alertas de piso de segurança (Break-Even) antes de fechar propostas.</li>
+              <li><span style="color:#10b981; font-weight:800;">✔</span> PDFs executivos de alta conversão gerados em 1 minuto.</li>
+              <li><span style="color:#10b981; font-weight:800;">✔</span> Crescimento comercial sustentável e previsibilidade de caixa.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Os 6 Pilares de Engenharia do ARNIX -->
+      <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 32px 0 16px; text-align:left;">
+        ⚡ Os 6 Motores de Inteligência do Ecossistema
       </h2>
 
       <div class="grid-features">
         <div class="feat-card">
           <div class="feat-icon">🎯</div>
-          <div class="feat-title">1. Cálculo de Margem Real & Markup</div>
+          <div class="feat-title">1. Formação de Preço & Markup Real</div>
           <p class="feat-desc">
-            Considera todos os custos fixos, variáveis, impostos em cascata, taxas de cartão e horas dedicadas para sugerir o preço exato com lucro garantido.
+            Considera custos fixos, variáveis, impostos em cascata, comissões e margem líquida para entregar o preço exato com lucro assegurado.
           </p>
         </div>
 
         <div class="feat-card">
           <div class="feat-icon">🛡️</div>
-          <div class="feat-title">2. Blindagem contra Prejuízos</div>
+          <div class="feat-title">2. Blindagem contra Prejuízos (Break-Even)</div>
           <p class="feat-desc">
-            Simula alertas de piso de preço e ponto de equilíbrio (Break-Even), impedindo que você feche contratos abaixo do custo operacional mínimo.
+            Simula alertas de piso de preço mínimo e ponto de equilíbrio, impedindo que você feche contratos abaixo do custo operacional real.
           </p>
         </div>
 
         <div class="feat-card">
           <div class="feat-icon">⚡</div>
-          <div class="feat-title">3. Orçamentos Rápidos em 1 Minuto</div>
+          <div class="feat-title">3. Gerador de Orçamentos Rápidos</div>
           <p class="feat-desc">
-            Substitui planilhas quebradas e complexas por um assistente intuitivo que gera propostas comerciais profissionais prontas para enviar.
+            Substitui processos manuais lentos por um assistente dinâmico que gera propostas comerciais profissionais prontas para o cliente.
           </p>
         </div>
 
         <div class="feat-card">
-          <div class="feat-icon">📈</div>
-          <div class="feat-title">4. Inteligência FinOps Contínua</div>
+          <div class="feat-icon">📊</div>
+          <div class="feat-title">4. Painel FinOps & Auditoria Transacional</div>
           <p class="feat-desc">
-            Acompanha a inflação dos insumos e reajustes salariais, alertando automaticamente o momento ideal de atualizar a tabela de preços do negócio.
+            Rastreabilidade completa de todas as propostas emitidas, taxas de conversão por segmento e histórico imutável de margens.
+          </p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">📄</div>
+          <div class="feat-title">5. Propostas Executivas em PDF</div>
+          <p class="feat-desc">
+            Emissão instantânea de documentos comerciais com identidade visual corporativa, escopo detalhado e termos de pagamento claros.
+          </p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">🔒</div>
+          <div class="feat-title">6. Arquitetura Segura & Conformidade LGPD</div>
+          <p class="feat-desc">
+            Criptografia de ponta a ponta, isolamento de dados com Zero-Trust, proteção contra invasões e total governança de dados pessoais.
           </p>
         </div>
       </div>
 
-      <!-- Banner CTA -->
-      <div class="cta-banner">
-        <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin: 0 0 10px 0;">
-          Contribua com a Validação Empírica do ARNIX
+      <!-- Segmentos Especializados -->
+      <div style="margin: 28px 0; padding: 22px; background: var(--bg-choice); border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;">
+        <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0;">
+          🏢 Desenvolvido Especialmente para a Sua Rotina:
         </h3>
-        <p style="font-size: 0.92rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 22px auto; line-height: 1.6;">
-          Sua experiência prática nos ajuda a calibrar a ferramenta para resolver os gargalos reais do seu dia a dia.
+        <p style="font-size: 0.84rem; color: var(--text-muted); margin: 0 0 14px 0;">
+          Modelos de cálculo calibrados para as particularidades de cada modelo de negócio:
         </p>
 
-        <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
-          <a href="index.html" class="btn btn-primary" style="padding:14px 28px; text-decoration:none; font-weight:700;">
-            <span>📝 Responder a Pesquisa (~3 min)</span>
-            <span>→</span>
+        <div class="segment-pills-wrap">
+          <div class="segment-pill">💻 Agências de TI & Software</div>
+          <div class="segment-pill">🎨 Estúdios de Design & Artes</div>
+          <div class="segment-pill">📢 Marketing & Mídia Digital</div>
+          <div class="segment-pill">📐 Arquitetura & Engenharia</div>
+          <div class="segment-pill">💼 Consultorias & Serviços</div>
+          <div class="segment-pill">🚀 Autônomos & Freelancers</div>
+        </div>
+      </div>
+
+      <!-- CTA Banner -->
+      <div class="cta-banner">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0;">
+          Sua Opinião Molda o Futuro da Plataforma ARNIX
+        </h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 20px; line-height: 1.6;">
+          Participe do nosso estudo de mercado. São apenas 2 minutos para compartilhar suas dores e garantir acesso antecipado exclusivo às primeiras versões da ferramenta.
+        </p>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <a href="index.html" class="btn btn-primary" style="padding:12px 28px; text-decoration:none; font-weight:700;">
+            <span>📝 Responder Pesquisa Rápida</span>
           </a>
-          <a href="fundador.html" class="btn btn-ghost" style="padding:14px 24px; text-decoration:none;">
+          <a href="fundador.html" class="btn btn-ghost" style="padding:12px 24px; text-decoration:none;">
             <span>👤 Conhecer o Fundador</span>
           </a>
         </div>
@@ -184,11 +388,11 @@
 
     <!-- Footer -->
     <footer class="form-footer" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; align-items:center;">
-      <div>ARNIX Smart Pricing Platform • Prattes Technologies © 2026</div>
+      <div>ARNIX Research • Prattes Technologies © 2026</div>
       <div style="display:flex; gap:16px;">
         <a href="index.html" style="color:var(--text-muted); text-decoration:none; font-size:0.85rem">Pesquisa</a>
-        <a href="fundador.html" style="color:var(--text-muted); text-decoration:none; font-size:0.85rem">Gabriel Prattes</a>
-        <a href="https://orbb.com.br" target="_blank" rel="noopener" style="color:var(--text-muted); text-decoration:none; font-size:0.85rem">Orbb.com.br</a>
+        <a href="fundador.html" style="color:var(--text-muted); text-decoration:none; font-size:0.85rem">Fundador</a>
+        <a href="dashboard.html" style="color:var(--text-muted); text-decoration:none; font-size:0.85rem">Dashboard AVS</a>
       </div>
     </footer>
 
