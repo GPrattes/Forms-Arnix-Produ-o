@@ -31,8 +31,9 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-IMG_DIR = os.path.join(BASE_DIR, "img")
-os.makedirs(IMG_DIR, exist_ok=True)
+FORMS_ROOT = os.path.dirname(BASE_DIR)
+FRONTEND_DIR = os.path.join(FORMS_ROOT, "frontend")
+IMG_DIR = os.path.join(FRONTEND_DIR, "img")
 
 # Importa o driver de banco dual (Vercel Postgres / SQLite)
 from db import insert_resposta, get_all_respostas
@@ -76,12 +77,12 @@ app.add_middleware(
 @app.get("/", include_in_schema=False)
 @app.get("/index.html", include_in_schema=False)
 async def serve_form():
-    return FileResponse(os.path.join(BASE_DIR, "index.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
 
 @app.get("/dashboard", include_in_schema=False)
 @app.get("/dashboard.html", include_in_schema=False)
 async def serve_dashboard():
-    return FileResponse(os.path.join(BASE_DIR, "dashboard.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "dashboard.html"))
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def serve_favicon():
@@ -90,15 +91,8 @@ async def serve_favicon():
         return FileResponse(favicon_path, media_type="image/png")
     return Response(status_code=204)
 
-@app.get("/backend/production_ui/img/arnix-sgv.png", include_in_schema=False)
-async def serve_legacy_favicon():
-    favicon_path = os.path.join(IMG_DIR, "arnix-sgv.png")
-    if os.path.exists(favicon_path):
-        return FileResponse(favicon_path, media_type="image/png")
-    return Response(status_code=204)
-
-app.mount("/css", StaticFiles(directory=os.path.join(BASE_DIR, "css")), name="css")
-app.mount("/js", StaticFiles(directory=os.path.join(BASE_DIR, "js")), name="js")
+app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")), name="css")
+app.mount("/js", StaticFiles(directory=os.path.join(FRONTEND_DIR, "js")), name="js")
 app.mount("/img", StaticFiles(directory=IMG_DIR), name="img")
 
 # ── ROTAS DE API ─────────────────────────────────────────────

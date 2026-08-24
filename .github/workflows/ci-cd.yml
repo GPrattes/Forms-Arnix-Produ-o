@@ -53,6 +53,6 @@ jobs:
           test -f api/index.py && echo "[OK] api/index.py presente"
           echo "========================================================"
           echo " ✅ ARNIX RESEARCH SYSTEM — 100% PRONTO PARA PRODUÇÃO"
-          echo " 🏢 Empresa: Prattes Technologies (Rafael Prattes)"
+          echo " 🏢 Empresa: Prattes Technologies (Gabriel Prattes)"
           echo " 🌐 Domínio: orbb.com.br / pesquisa.orbb.com.br"
           echo "========================================================"
