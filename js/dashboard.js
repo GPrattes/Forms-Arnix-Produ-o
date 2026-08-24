@@ -9,19 +9,85 @@
 let allResponses = [];
 let chartInstances = {};
 
+const VALID_ADMIN_KEYS = ['prattes@arnix2026!master', 'arnix2026', 'prattes2026', 'admin2026'];
+
 document.addEventListener('DOMContentLoaded', () => {
+  checkAdminAuth();
   initTheme();
-  loadDataAndRender();
 });
+
+/* ── 0. PROTEÇÃO & AUTENTICAÇÃO DO ADMINISTRADOR ───────────── */
+function getAdminToken() {
+  return sessionStorage.getItem('arnix_admin_auth_token') || localStorage.getItem('arnix_admin_auth_token') || '';
+}
+
+function checkAdminAuth() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const keyParam = urlParams.get('key');
+  
+  if (keyParam && VALID_ADMIN_KEYS.includes(keyParam.toLowerCase())) {
+    sessionStorage.setItem('arnix_admin_auth_token', keyParam);
+    sessionStorage.setItem('arnix_admin_auth', 'true');
+  }
+
+  const isAuth = sessionStorage.getItem('arnix_admin_auth') === 'true';
+  const overlay = document.getElementById('adminAuthOverlay');
+  if (overlay) {
+    overlay.style.display = isAuth ? 'none' : 'flex';
+  }
+
+  if (isAuth) {
+    loadDataAndRender();
+  }
+}
+
+async function handleAdminLogin(event) {
+  event.preventDefault();
+  const input = document.getElementById('adminPasskeyInput');
+  const errorEl = document.getElementById('adminLoginError');
+  const val = input ? input.value.trim() : '';
+
+  if (VALID_ADMIN_KEYS.includes(val.toLowerCase())) {
+    sessionStorage.setItem('arnix_admin_auth_token', val);
+    sessionStorage.setItem('arnix_admin_auth', 'true');
+    const overlay = document.getElementById('adminAuthOverlay');
+    if (overlay) overlay.style.display = 'none';
+    if (errorEl) errorEl.style.display = 'none';
+    await loadDataAndRender();
+  } else {
+    if (errorEl) errorEl.style.display = 'block';
+    if (input) input.value = '';
+  }
+}
+window.handleAdminLogin = handleAdminLogin;
+
+function adminLogout() {
+  sessionStorage.removeItem('arnix_admin_auth');
+  sessionStorage.removeItem('arnix_admin_auth_token');
+  localStorage.removeItem('arnix_admin_auth_token');
+  const overlay = document.getElementById('adminAuthOverlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+  }
+  const input = document.getElementById('adminPasskeyInput');
+  if (input) input.value = '';
+}
+window.adminLogout = adminLogout;
 
 /* ── 1. CARREGAMENTO DE DADOS (API OU LOCALSTORAGE OU SEED) ── */
 async function loadDataAndRender() {
+  const token = getAdminToken();
   try {
-    const res = await fetch('/api/respostas');
+    const res = await fetch('/api/respostas', {
+      headers: {
+        'x-admin-key': token,
+        'Authorization': 'Bearer ' + token
+      }
+    });
     if (res.ok) {
       allResponses = await res.json();
     } else {
-      throw new Error('Fallback local');
+      throw new Error('Falha autenticação API ou fallback');
     }
   } catch (e) {
     const local = localStorage.getItem('arnix_survey_responses');

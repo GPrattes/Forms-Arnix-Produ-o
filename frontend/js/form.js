@@ -208,6 +208,16 @@ async function submitSurvey() {
     localStorage.setItem('arnix_survey_responses', JSON.stringify(localStore));
   }
 
+  // Se o usuário preencheu o e-mail/WhatsApp, exibe o cartão de confirmação de lembrete
+  if (surveyData.lead_contato) {
+    const badge = document.getElementById('emailConfirmationBadge');
+    const leadText = document.getElementById('displayUserLead');
+    if (badge && leadText) {
+      leadText.textContent = surveyData.lead_contato;
+      badge.style.display = 'block';
+    }
+  }
+
   // Avança para tela de sucesso
   nextStep(6);
 }

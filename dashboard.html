@@ -12,6 +12,26 @@
 </head>
 <body>
 
+  <!-- ── MODAL DE AUTENTICAÇÃO DO ADMINISTRADOR ──────────────── -->
+  <div id="adminAuthOverlay" style="position:fixed; inset:0; background:rgba(8,12,22,0.92); backdrop-filter:blur(16px); z-index:9999; display:flex; align-items:center; justify-content:center;">
+    <div style="background:var(--bg-card); border:1.5px solid var(--border); border-radius:24px; padding:36px; max-width:420px; width:90%; text-align:center; box-shadow:0 25px 50px rgba(0,0,0,0.5);">
+      <div style="font-size:2.8rem; margin-bottom:12px">🔒</div>
+      <h2 style="font-size:1.4rem; font-weight:800; color:var(--text-main); margin-bottom:6px">Acesso Restrito</h2>
+      <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.5; margin-bottom:20px">
+        Este painel executivo contém dados estratégicos de validação de mercado do <strong>ARNIX</strong>. Digite a Chave Mestre para desbloquear.
+      </p>
+
+      <form onsubmit="handleAdminLogin(event)" style="display:flex; flex-direction:column; gap:12px;">
+        <input type="password" id="adminPasskeyInput" placeholder="Chave do Administrador" style="width:100%; box-sizing:border-box; padding:14px; text-align:center; font-size:1rem; border-radius:12px; border:1px solid var(--border); background:rgba(15,23,42,0.8); color:var(--text-main); outline:none;" required autofocus>
+        <div id="adminLoginError" style="display:none; color:#f43f5e; font-size:0.8rem; font-weight:600">Chave incorreta. Tente novamente.</div>
+        <button type="submit" class="btn btn-primary" style="width:100%; padding:14px; font-weight:700; border-radius:12px; justify-content:center;">
+          <span>Desbloquear Dashboard</span>
+          <span>→</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- Ambient Glow -->
   <div class="ambient-glow" aria-hidden="true"></div>
 
@@ -38,6 +58,9 @@
         </button>
         <button class="btn" id="themeToggle" type="button" aria-label="Alternar Tema">
           <span>🌓</span>
+        </button>
+        <button class="btn" onclick="adminLogout()" title="Encerrar sessão de administrador" style="border: 1px solid rgba(244,63,94,0.4); color: #f43f5e; background: rgba(244,63,94,0.08);">
+          <span>🔒 Sair</span>
         </button>
       </div>
     </div>

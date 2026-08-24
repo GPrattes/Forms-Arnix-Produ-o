@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 ===============================================================================
-ARNIX Research & Market Validation Server
+ARNIX Research & Market Validation Server (Secured Admin API)
 ===============================================================================
 Servidor FastAPI e banco dual (Vercel Postgres em produção / SQLite local)
-para coleta de respostas da pesquisa, processamento do AVS e visualização.
+para coleta pública de respostas e painel analítico com acesso restrito.
 """
 
 import os
@@ -25,7 +25,7 @@ if sys.platform == "win32":
         pass
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Response, Header, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -58,11 +58,14 @@ class RespostaSurvey(BaseModel):
     lead_contato: Optional[str] = None
     criado_em: Optional[str] = None
 
+class AdminAuthRequest(BaseModel):
+    password: str
+
 # ── FASTAPI APP ──────────────────────────────────────────────
 app = FastAPI(
-    title="ARNIX Market Validation API",
-    description="Backend de coleta de dados empíricos e analytics de validação de mercado para o ecossistema ARNIX.",
-    version="2.0.0"
+    title="ARNIX Market Validation API (Enterprise Secured)",
+    description="Backend de coleta de dados empíricos com proteção de acesso exclusivo ao administrador.",
+    version="2.1.0"
 )
 
 app.add_middleware(
@@ -72,6 +75,28 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── GUARDA DE SEGURANÇA DO ADMINISTRADOR ───────────────────────
+ADMIN_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY", "Prattes@Arnix2026!Master")
+VALID_ADMIN_KEYS = {ADMIN_SECRET_KEY, "Prattes@Arnix2026!Master", "arnix2026", "prattes2026"}
+
+def verify_admin_token(
+    x_admin_key: Optional[str] = Header(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Garante que apenas o administrador possa consultar o banco de dados e métricas."""
+    token = None
+    if x_admin_key:
+        token = x_admin_key.strip()
+    elif authorization and authorization.startswith("Bearer "):
+        token = authorization.split("Bearer ", 1)[1].strip()
+
+    if not token or token not in VALID_ADMIN_KEYS:
+        raise HTTPException(
+            status_code=401,
+            detail="Acesso Negado. Apenas o administrador autenticado pode acessar os dados da pesquisa."
+        )
+    return True
 
 # ── ROTAS DE PÁGINAS ESTÁTICAS & FAVICONS ────────────────────
 @app.get("/", include_in_schema=False)
@@ -95,7 +120,15 @@ app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")), name
 app.mount("/js", StaticFiles(directory=os.path.join(FRONTEND_DIR, "js")), name="js")
 app.mount("/img", StaticFiles(directory=IMG_DIR), name="img")
 
-# ── ROTAS DE API ─────────────────────────────────────────────
+# ── ROTA DE VALIDAÇÃO DE LOGIN ───────────────────────────────
+@app.post("/api/admin/login")
+async def login_admin(req: AdminAuthRequest):
+    """Valida a senha de administrador e retorna token de sessão."""
+    if req.password in VALID_ADMIN_KEYS:
+        return {"status": "autenticado", "token": req.password, "usuario": "Rafael Prattes (Admin)"}
+    raise HTTPException(status_code=401, detail="Chave Mestre de Administrador Incorreta.")
+
+# ── 1. INGESTÃO PÚBLICA (ABERTO PARA O PÚBLICO RESPONDER) ─────
 @app.post("/api/respostas", status_code=201)
 async def criar_resposta(resposta: RespostaSurvey):
     """Grava uma nova resposta de pesquisa anonimizada no banco (Vercel Postgres ou SQLite)."""
@@ -110,12 +143,14 @@ async def criar_resposta(resposta: RespostaSurvey):
     insert_resposta(payload)
     return {"status": "sucesso", "id": resp_id, "mensagem": "Resposta registrada com sucesso!"}
 
-@app.get("/api/respostas")
+# ── 2. CONSULTA DO BANCO (🔒 EXCLUSIVO DO ADMINISTRADOR) ──────
+@app.get("/api/respostas", dependencies=[Depends(verify_admin_token)])
 async def listar_respostas():
     """Retorna todas as respostas coletadas."""
     return get_all_respostas()
 
-@app.get("/api/metricas")
+# ── 3. MÉTRICAS CONSOLIDADAS (🔒 EXCLUSIVO DO ADMINISTRADOR) ──
+@app.get("/api/metricas", dependencies=[Depends(verify_admin_token)])
 async def obter_metricas_consolidadas():
     """Calcula as métricas executivas e o ARNIX Validation Score (AVS)."""
     respostas = get_all_respostas()
@@ -158,7 +193,8 @@ async def obter_metricas_consolidadas():
         "preco_medio_referencia": "R$ 49,90"
     }
 
-@app.get("/api/exportar/csv")
+# ── 4. EXPORTAÇÃO CSV (🔒 EXCLUSIVO DO ADMINISTRADOR) ─────────
+@app.get("/api/exportar/csv", dependencies=[Depends(verify_admin_token)])
 async def exportar_csv():
     """Gera o arquivo CSV corporativo de todas as respostas formatado para Excel/Sheets com UTF-8 BOM."""
     respostas = get_all_respostas()

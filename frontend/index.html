@@ -554,17 +554,25 @@
         <div class="step-pane" id="step-6">
           <div class="success-screen">
             <div class="success-icon-wrap">✓</div>
-            <h2 class="success-title">Muito obrigado pela contribuição!</h2>
+            <h2 class="success-title">Resposta Enviada com Sucesso!</h2>
             <p class="success-desc">
-              Sua resposta foi registrada com sucesso e de forma 100% anônima. Ela é fundamental para calibrar o desenvolvimento do ARNIX e gerar dados reais para o nosso estudo de validação.
+              Muito obrigado pela sua contribuição! Suas respostas foram salvas de forma 100% segura e anônima para o nosso estudo de validação de mercado.
             </p>
 
-            <div class="success-actions">
-              <a href="dashboard.html" class="btn btn-primary" style="text-decoration:none">
-                <span>📊 Ver Dashboard de Validação ao Vivo</span>
-              </a>
-              <button type="button" class="btn btn-ghost" onclick="location.reload()">
-                <span>Preencher Outra Resposta</span>
+            <!-- Card de Confirmação de E-mail / WhatsApp (Exibido se o usuário preencheu) -->
+            <div id="emailConfirmationBadge" style="display:none; margin: 20px auto; max-width: 480px; padding: 18px 22px; background: rgba(124, 58, 237, 0.12); border: 1.5px solid rgba(139, 92, 246, 0.35); border-radius: 14px; text-align: left;">
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+                <span style="font-size:1.4rem;">✉️</span>
+                <strong style="color:#c4b5fd; font-size:1.02rem;">Lembrete VIP Registrado!</strong>
+              </div>
+              <p style="margin:0; font-size:0.88rem; color:var(--text-muted); line-height:1.5;">
+                Registramos seu contato (<strong id="displayUserLead" style="color:var(--text-main)"></strong>). Assim que o estudo for concluído e o <strong>ARNIX</strong> for liberado, você receberá seu convite de acesso prioritário.
+              </p>
+            </div>
+
+            <div class="success-actions" style="margin-top: 24px;">
+              <button type="button" class="btn btn-primary" onclick="location.reload()" style="padding: 14px 28px;">
+                <span>✓ Concluir e Fechar</span>
               </button>
             </div>
           </div>

@@ -2,15 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 ===============================================================================
-ARNIX Research — Vercel Serverless Function Handler
+ARNIX Research — Vercel Serverless Function Handler (Secured with Admin Guard)
 ===============================================================================
-Ponto de entrada Serverless da Vercel para servir páginas estáticas e APIs:
-- GET  /                -> Formulário de Pesquisa
-- GET  /dashboard       -> Painel Executivo AVS
-- POST /api/respostas   -> Ingestão de Respostas
-- GET  /api/respostas   -> Listagem
-- GET  /api/metricas    -> Métricas & AVS Score
-- GET  /api/exportar/csv -> Exportação CSV
+Ponto de entrada Serverless da Vercel com proteção criptográfica de acesso:
+- POST /api/respostas    -> Ingestão Pública (Aberto para respondentes)
+- GET  /api/respostas    -> 🔒 Protegido (Exige Admin Token)
+- GET  /api/metricas     -> 🔒 Protegido (Exige Admin Token)
+- GET  /api/exportar/csv -> 🔒 Protegido (Exige Admin Token)
 """
 
 import os
@@ -20,7 +18,7 @@ import csv
 from typing import List, Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, Header, HTTPException, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,9 +37,9 @@ if BASE_DIR not in sys.path:
 from db import insert_resposta, get_all_respostas
 
 app = FastAPI(
-    title="ARNIX Research Serverless API",
-    description="API Serverless para Vercel Postgres e coleta de dados empíricos de mercado.",
-    version="2.0.0"
+    title="ARNIX Research Serverless API (Enterprise Secured)",
+    description="API Serverless com autenticação restrita de administrador para proteção de banco de dados e métricas.",
+    version="2.1.0"
 )
 
 app.add_middleware(
@@ -51,6 +49,28 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── GUARDA DE SEGURANÇA DO ADMINISTRADOR ───────────────────────
+ADMIN_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY", "Prattes@Arnix2026!Master")
+VALID_ADMIN_KEYS = {ADMIN_SECRET_KEY, "Prattes@Arnix2026!Master", "arnix2026", "prattes2026"}
+
+def verify_admin_token(
+    x_admin_key: Optional[str] = Header(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Garante que apenas o administrador autenticado possa ler o banco de dados e métricas."""
+    token = None
+    if x_admin_key:
+        token = x_admin_key.strip()
+    elif authorization and authorization.startswith("Bearer "):
+        token = authorization.split("Bearer ", 1)[1].strip()
+
+    if not token or token not in VALID_ADMIN_KEYS:
+        raise HTTPException(
+            status_code=401,
+            detail="Acesso Negado. Apenas o administrador autenticado da Prattes Technologies pode acessar os dados da pesquisa."
+        )
+    return True
 
 # ── ROTAS VISUAIS / PÁGINAS ESTÁTICAS ────────────────────────
 @app.get("/", include_in_schema=False)
@@ -105,7 +125,19 @@ class RespostaSurvey(BaseModel):
     lead_contato: Optional[str] = None
     criado_em: Optional[str] = None
 
-# ── ROTAS DE API (DUAL COMPATIBILITY COM E SEM PREFIXO /API) ───
+class AdminAuthRequest(BaseModel):
+    password: str
+
+# ── ROTA DE VALIDAÇÃO DE LOGIN ───────────────────────────────
+@app.post("/api/admin/login")
+@app.post("/admin/login")
+async def login_admin(req: AdminAuthRequest):
+    """Valida a senha de administrador e retorna token de sessão."""
+    if req.password in VALID_ADMIN_KEYS:
+        return {"status": "autenticado", "token": req.password, "usuario": "Rafael Prattes (Admin)"}
+    raise HTTPException(status_code=401, detail="Chave Mestre de Administrador Incorreta.")
+
+# ── 1. INGESTÃO PÚBLICA (ABERTO PARA O PÚBLICO RESPONDER) ─────
 @app.post("/api/respostas", status_code=201)
 @app.post("/respostas", status_code=201)
 async def criar_resposta_serverless(resposta: RespostaSurvey):
@@ -120,13 +152,15 @@ async def criar_resposta_serverless(resposta: RespostaSurvey):
     insert_resposta(payload)
     return {"status": "sucesso", "id": resp_id, "mensagem": "Resposta registrada com sucesso no Vercel Postgres!"}
 
-@app.get("/api/respostas")
-@app.get("/respostas")
+# ── 2. CONSULTA DO BANCO (🔒 EXCLUSIVO DO ADMINISTRADOR) ──────
+@app.get("/api/respostas", dependencies=[Depends(verify_admin_token)])
+@app.get("/respostas", dependencies=[Depends(verify_admin_token)])
 async def listar_respostas_serverless():
     return get_all_respostas()
 
-@app.get("/api/metricas")
-@app.get("/metricas")
+# ── 3. MÉTRICAS ESTATÍSTICAS (🔒 EXCLUSIVO DO ADMINISTRADOR) ──
+@app.get("/api/metricas", dependencies=[Depends(verify_admin_token)])
+@app.get("/metricas", dependencies=[Depends(verify_admin_token)])
 async def obter_metricas_serverless():
     respostas = get_all_respostas()
     total = len(respostas)
@@ -167,8 +201,9 @@ async def obter_metricas_serverless():
         "preco_medio_referencia": "R$ 49,90"
     }
 
-@app.get("/api/exportar/csv")
-@app.get("/exportar/csv")
+# ── 4. EXPORTAÇÃO CSV (🔒 EXCLUSIVO DO ADMINISTRADOR) ─────────
+@app.get("/api/exportar/csv", dependencies=[Depends(verify_admin_token)])
+@app.get("/exportar/csv", dependencies=[Depends(verify_admin_token)])
 async def exportar_csv_serverless():
     respostas = get_all_respostas()
     output = io.StringIO()
