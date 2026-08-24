@@ -29,13 +29,13 @@ jobs:
 
       - name: Validar Sintaxe & Compilação Python
         run: |
-          python -m py_compile server.py
-          python -m py_compile db.py
+          python -m py_compile backend/server.py
+          python -m py_compile backend/db.py
           python -m py_compile api/index.py
 
       - name: Executar Teste Funcional dos Endpoints
         run: |
-          python -c "from fastapi.testclient import TestClient; from server import app; client = TestClient(app); assert client.get('/').status_code == 200; assert client.get('/dashboard').status_code == 200; assert client.get('/api/metricas').status_code == 200; print('[OK] Todos os endpoints do forms responderam com status 200!')"
+          python -c "import sys; sys.path.insert(0, 'backend'); from fastapi.testclient import TestClient; from server import app; client = TestClient(app); assert client.get('/').status_code == 200; assert client.get('/dashboard').status_code == 200; assert client.get('/api/metricas').status_code == 200; print('[OK] Todos os endpoints do forms responderam com status 200!')"
 
   deploy-check:
     name: 🚀 Vercel & Production Verification
@@ -48,11 +48,12 @@ jobs:
       - name: Verificar Estrutura para Deploy Vercel
         run: |
           test -f vercel.json && echo "[OK] vercel.json presente"
-          test -f index.html && echo "[OK] index.html presente"
-          test -f dashboard.html && echo "[OK] dashboard.html presente"
+          test -f frontend/index.html && echo "[OK] frontend/index.html presente"
+          test -f frontend/dashboard.html && echo "[OK] frontend/dashboard.html presente"
+          test -f backend/server.py && echo "[OK] backend/server.py presente"
           test -f api/index.py && echo "[OK] api/index.py presente"
           echo "========================================================"
           echo " ✅ ARNIX RESEARCH SYSTEM — 100% PRONTO PARA PRODUÇÃO"
-          echo " 🏢 Empresa: Prattes Technologies (Gabriel Prattes)"
-          echo " 🌐 Domínio: orbb.com.br / pesquisa.orbb.com.br"
+          echo " 🏢 Empresa: Prattes Technologies"
+          echo " 🌐 Domínio: orbb.com.br / arnix-forms.orbb.com.br"
           echo "========================================================"
