@@ -5,13 +5,11 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.py" },
-    { "source": "/dashboard", "destination": "/frontend/dashboard.html" },
-    { "source": "/dashboard.html", "destination": "/frontend/dashboard.html" },
-    { "source": "/pesquisa", "destination": "/frontend/index.html" },
-    { "source": "/css/(.*)", "destination": "/frontend/css/$1" },
-    { "source": "/js/(.*)", "destination": "/frontend/js/$1" },
-    { "source": "/img/(.*)", "destination": "/frontend/img/$1" },
-    { "source": "/favicon.ico", "destination": "/frontend/img/arnix-sgv.png" }
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/dashboard.html", "destination": "/dashboard.html" },
+    { "source": "/pesquisa", "destination": "/index.html" },
+    { "source": "/favicon.ico", "destination": "/img/arnix-sgv.png" },
+    { "source": "/", "destination": "/index.html" }
   ],
   "headers": [
     {

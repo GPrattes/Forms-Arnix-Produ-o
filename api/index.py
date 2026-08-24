@@ -4,11 +4,13 @@
 ===============================================================================
 ARNIX Research — Vercel Serverless Function Handler
 ===============================================================================
-Ponto de entrada Serverless da Vercel para responder às rotas:
-- POST /api/respostas
-- GET  /api/respostas
-- GET  /api/metricas
-- GET  /api/exportar/csv
+Ponto de entrada Serverless da Vercel para servir páginas estáticas e APIs:
+- GET  /                -> Formulário de Pesquisa
+- GET  /dashboard       -> Painel Executivo AVS
+- POST /api/respostas   -> Ingestão de Respostas
+- GET  /api/respostas   -> Listagem
+- GET  /api/metricas    -> Métricas & AVS Score
+- GET  /api/exportar/csv -> Exportação CSV
 """
 
 import os
@@ -19,12 +21,16 @@ from typing import List, Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, Response
-from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # Inclui diretório backend e forms no path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BACKEND_DIR = os.path.join(BASE_DIR, "backend")
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
+IMG_DIR = os.path.join(FRONTEND_DIR, "img")
+
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 if BASE_DIR not in sys.path:
@@ -46,6 +52,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── ROTAS VISUAIS / PÁGINAS ESTÁTICAS ────────────────────────
+@app.get("/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)
+@app.get("/pesquisa", include_in_schema=False)
+async def serve_form():
+    idx_path = os.path.join(FRONTEND_DIR, "index.html")
+    if not os.path.exists(idx_path):
+        idx_path = os.path.join(BASE_DIR, "index.html")
+    return FileResponse(idx_path)
+
+@app.get("/dashboard", include_in_schema=False)
+@app.get("/dashboard.html", include_in_schema=False)
+async def serve_dashboard():
+    dash_path = os.path.join(FRONTEND_DIR, "dashboard.html")
+    if not os.path.exists(dash_path):
+        dash_path = os.path.join(BASE_DIR, "dashboard.html")
+    return FileResponse(dash_path)
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def serve_favicon():
+    fav_path = os.path.join(IMG_DIR, "arnix-sgv.png")
+    if os.path.exists(fav_path):
+        return FileResponse(fav_path, media_type="image/png")
+    return Response(status_code=204)
+
+# Monta pastas estáticas com segurança
+if os.path.exists(os.path.join(FRONTEND_DIR, "css")):
+    app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")), name="css")
+if os.path.exists(os.path.join(FRONTEND_DIR, "js")):
+    app.mount("/js", StaticFiles(directory=os.path.join(FRONTEND_DIR, "js")), name="js")
+if os.path.exists(IMG_DIR):
+    app.mount("/img", StaticFiles(directory=IMG_DIR), name="img")
+
+# ── SCHEMAS PYDANTIC ─────────────────────────────────────────
 class RespostaSurvey(BaseModel):
     id: Optional[str] = None
     relacao_negocio: str
@@ -65,6 +105,7 @@ class RespostaSurvey(BaseModel):
     lead_contato: Optional[str] = None
     criado_em: Optional[str] = None
 
+# ── ROTAS DE API ─────────────────────────────────────────────
 @app.post("/api/respostas", status_code=201)
 async def criar_resposta_serverless(resposta: RespostaSurvey):
     now_utc = datetime.now(timezone.utc)
