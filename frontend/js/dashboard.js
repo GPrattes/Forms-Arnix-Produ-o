@@ -255,14 +255,43 @@ function renderCharts() {
     plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 12 } } }
   });
 
-  // 2. Gráfico Faixas de Preço WTP (Bar)
+  // 2. Gráfico Ferramentas Específicas em Uso (Doughnut / Pie)
+  const ferramentasCount = {
+    'Excel/Google Sheets': 0,
+    'Nenhuma': 0,
+    'Calculadora/Papel': 0,
+    'ERP/Gestão': 0,
+    'Software de Precificação': 0,
+    'Outro': 0
+  };
+  allResponses.forEach(r => {
+    const f = r.ferramenta_especifica || (r.metodo_atual === 'Excel/Planilha' ? 'Excel/Google Sheets' : 'Nenhuma');
+    if (ferramentasCount[f] !== undefined) {
+      ferramentasCount[f]++;
+    } else {
+      ferramentasCount['Outro']++;
+    }
+  });
+
+  createOrUpdateChart('chartFerramentas', 'doughnut', {
+    labels: ['Excel / Google Sheets', 'Nenhuma Ferramenta', 'Calculadora / Papel', 'ERP / Gestão', 'Software Precificação', 'Outro'],
+    datasets: [{
+      data: Object.values(ferramentasCount),
+      backgroundColor: ['#10b981', '#64748b', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899'],
+      borderWidth: 0
+    }]
+  }, {
+    plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 12 } } }
+  });
+
+  // 3. Gráfico Faixas de Preço WTP (Bar - Sem Âncora)
   const precosCount = { 'Gratuito': 0, 'Até R$ 19,90': 0, 'R$ 20–39,90': 0, 'R$ 40–59,90': 0, 'R$ 60–99,90': 0, 'Mais de R$ 100': 0 };
   allResponses.forEach(r => {
     const p = r.disposicao_pagamento || '';
     if (p.includes('Gratuito')) precosCount['Gratuito']++;
     else if (p.includes('19,90')) precosCount['Até R$ 19,90']++;
     else if (p.includes('20 a 39,90') || p.includes('20–39,90')) precosCount['R$ 20–39,90']++;
-    else if (p.includes('40 a 59,90') || p.includes('40–59,90')) precosCount['R$ 40–59,90']++;
+    else if (p.includes('40 a 59,90') || p.includes('40–59,90') || p.includes('40')) precosCount['R$ 40–59,90']++;
     else if (p.includes('60 a 99,90') || p.includes('60–99,90')) precosCount['R$ 60–99,90']++;
     else if (p.includes('100')) precosCount['Mais de R$ 100']++;
   });
@@ -283,7 +312,48 @@ function renderCharts() {
     }
   });
 
-  // 3. Gráfico Maiores Dores (Horizontal Bar)
+  // 4. Gráfico Fatores Decisivos de Migração / Troca (Horizontal Bar)
+  const migracaoCount = {
+    'Economia de tempo': 0,
+    'Maior precisão': 0,
+    'Controle da margem': 0,
+    'Redução de erros': 0,
+    'Geração de propostas': 0,
+    'Facilidade de uso': 0,
+    'Preço acessível': 0,
+    'Integração': 0
+  };
+
+  allResponses.forEach(r => {
+    if (Array.isArray(r.fatores_substituicao)) {
+      r.fatores_substituicao.forEach(f => {
+        if (migracaoCount[f] !== undefined) migracaoCount[f]++;
+      });
+    } else if (r.resolveria_problema?.includes('Sim')) {
+      // Fallback inteligente para dados legados
+      migracaoCount['Economia de tempo']++;
+      migracaoCount['Controle da margem']++;
+    }
+  });
+
+  createOrUpdateChart('chartMigracao', 'bar', {
+    labels: Object.keys(migracaoCount),
+    datasets: [{
+      label: 'Citações de Valor',
+      data: Object.values(migracaoCount),
+      backgroundColor: '#06b6d4',
+      borderRadius: 6
+    }]
+  }, {
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: textColor }, grid: { color: gridColor } },
+      y: { ticks: { color: textColor }, grid: { display: false } }
+    }
+  });
+
+  // 5. Gráfico Maiores Dores (Horizontal Bar)
   const doresCount = {
     'Margem de lucro real': 0,
     'Calcular custos diretos': 0,
@@ -319,12 +389,12 @@ function renderCharts() {
     }
   });
 
-  // 4. Gráfico Impacto Financeiro (Grouped Bar)
+  // 6. Gráfico Impacto Financeiro (Grouped Bar)
   const impacto = {
-    perdeu_venda_sim: allResponses.filter(r => r.perdeu_venda_preco_alto === 'Sim').length,
-    perdeu_venda_nao: allResponses.filter(r => r.perdeu_venda_preco_alto === 'Não').length,
-    prejuizo_sim: allResponses.filter(r => r.teve_prejuizo_preco_baixo === 'Sim').length,
-    prejuizo_nao: allResponses.filter(r => r.teve_prejuizo_preco_baixo === 'Não').length
+    perdeu_venda_sim: allResponses.filter(r => r.perdeu_venda_preco_alto && (r.perdeu_venda_preco_alto.includes('Sim') || r.perdeu_venda_preco_alto.includes('frequência') || r.perdeu_venda_preco_alto.includes('às vezes'))).length,
+    perdeu_venda_nao: allResponses.filter(r => r.perdeu_venda_preco_alto && (r.perdeu_venda_preco_alto.includes('Não') || r.perdeu_venda_preco_alto.includes('Raramente'))).length,
+    prejuizo_sim: allResponses.filter(r => r.teve_prejuizo_preco_baixo && (r.teve_prejuizo_preco_baixo.includes('Sim') || r.teve_prejuizo_preco_baixo.includes('várias') || r.teve_prejuizo_preco_baixo.includes('poucas') || r.teve_prejuizo_preco_baixo.includes('Desconfio'))).length,
+    prejuizo_nao: allResponses.filter(r => r.teve_prejuizo_preco_baixo && r.teve_prejuizo_preco_baixo.includes('Não')).length
   };
 
   createOrUpdateChart('chartImpacto', 'bar', {
@@ -377,7 +447,7 @@ function renderResponsesTable() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" style="text-align:center; padding:36px; color:var(--text-muted);">
+        <td colspan="10" style="text-align:center; padding:36px; color:var(--text-muted);">
           <div style="font-size:1.8rem; margin-bottom:8px">📭</div>
           <strong>Nenhuma resposta registrada no momento.</strong>
           <p style="margin:4px 0 0; font-size:0.85rem">Aguardando novos respondentes ou clique em "🌱 Gerar Dados Demo" para pré-visualizar.</p>
@@ -391,6 +461,7 @@ function renderResponsesTable() {
     const tr = document.createElement('tr');
     const idDisplay = r.id ? r.id.substring(0, 8) : `#${idx + 1}`;
     const dateDisplay = r.criado_em ? new Date(r.criado_em).toLocaleDateString('pt-BR') : 'Recente';
+    const ferramentaDisplay = r.ferramenta_especifica || (r.metodo_atual === 'Excel/Planilha' ? 'Planilhas' : 'Nenhuma');
 
     tr.innerHTML = `
       <td style="font-family:var(--font-mono); font-weight:600; color:var(--violet-lt)">${idDisplay}</td>
@@ -398,6 +469,7 @@ function renderResponsesTable() {
       <td>${r.porte_negocio || 'N/A'}</td>
       <td><span class="status-tag status-tag-blue">${r.segmento || 'N/A'}</span></td>
       <td>${r.metodo_atual || 'N/A'}</td>
+      <td><span class="status-tag status-tag-amber" style="font-size:0.75rem">${ferramentaDisplay}</span></td>
       <td><strong>${r.frequencia_dificuldade || '3'}/5</strong></td>
       <td><span class="status-tag ${r.resolveria_problema?.includes('Sim') ? 'status-tag-green' : 'status-tag-amber'}">${r.resolveria_problema || 'N/A'}</span></td>
       <td><strong>${r.disposicao_pagamento || 'N/A'}</strong></td>
@@ -409,10 +481,11 @@ function renderResponsesTable() {
 
 /* ── 5. GERADOR DE AMOSTRAS DE VALIDAÇÃO (DATASET DE 87 RESPOSTAS) */
 function generateInitialValidationDataset() {
-  const segmentos = ['Serviços', 'Tecnologia', 'Comércio', 'Agência/Consultoria', 'Alimentação'];
+  const segmentos = ['Serviços', 'Tecnologia', 'Design/Artes', 'Comércio', 'Agência/Consultoria', 'Alimentação'];
   const portes = ['MEI', 'Microempresa', 'Pequena empresa', 'Trabalho sozinho'];
   const relacoes = ['Proprietário(a)', 'Sócio(a)', 'Financeiro', 'Comercial', 'Autônomo/Freelancer'];
   const metodos = ['Excel/Planilha', 'Excel/Planilha', 'Manualmente', 'Sistema', 'Concorrência', 'Experiência'];
+  const ferramentas = ['Excel/Google Sheets', 'Excel/Google Sheets', 'Nenhuma', 'Calculadora/Papel', 'ERP/Gestão', 'Software de Precificação'];
   const precos = [
     'R$ 40 a 59,90/mês', 'R$ 40 a 59,90/mês', 'R$ 20 a 39,90/mês',
     'Até R$ 19,90/mês', 'R$ 60 a 99,90/mês', 'Apenas Gratuito'
@@ -429,17 +502,23 @@ function generateInitialValidationDataset() {
       porte_negocio: portes[Math.floor(Math.random() * portes.length)],
       segmento: segmentos[Math.floor(Math.random() * segmentos.length)],
       metodo_atual: metodos[Math.floor(Math.random() * metodos.length)],
+      ferramenta_especifica: ferramentas[Math.floor(Math.random() * ferramentas.length)],
       frequencia_dificuldade: isProblematic ? (Math.random() < 0.5 ? 4 : 5) : (Math.random() < 0.6 ? 2 : 3),
       dificuldades: [
         'Margem de lucro real',
         'Calcular custos diretos',
         Math.random() < 0.6 ? 'Impostos e encargos' : 'Custos indiretos'
       ],
-      perdeu_venda_preco_alto: Math.random() < 0.65 ? 'Sim' : 'Não',
-      teve_prejuizo_preco_baixo: Math.random() < 0.62 ? 'Sim' : 'Não',
+      perdeu_venda_preco_alto: Math.random() < 0.65 ? 'Sim, às vezes' : 'Não, nunca',
+      teve_prejuizo_preco_baixo: Math.random() < 0.62 ? 'Sim, várias vezes' : 'Não, nunca',
       tempo_gasto: Math.random() < 0.5 ? '15-30 min' : '30-60 min',
       importancia_melhorar: Math.random() < 0.8 ? 5 : 4,
       resolveria_problema: isInterested ? 'Sim, resolveria bastante' : 'Sim, parcialmente',
+      fatores_substituicao: [
+        'Economia de tempo',
+        'Controle da margem',
+        Math.random() < 0.5 ? 'Geração de propostas' : 'Redução de erros'
+      ],
       utilizaria_ferramenta: isInterested ? 'Sim, com certeza' : 'Provavelmente sim',
       frequencia_uso: Math.random() < 0.6 ? 'Algumas vezes por semana' : 'Diariamente',
       disposicao_pagamento: precos[Math.floor(Math.random() * precos.length)],
@@ -476,11 +555,12 @@ function exportDataCSV() {
   csv += `# Total de Respondentes Validados: ${allResponses.length}\n`;
   csv += '# --------------------------------------------------------------------------------\n';
 
-  csv += 'ID da Resposta;Data/Hora de Registro;Relação com o Negócio;Porte da Empresa;Segmento de Atuação;Método Atual de Precificação;Frequência da Dificuldade (1 a 5);Maiores Dores / Gargalos;Já Perdeu Venda por Preço Alto?;Já Teve Prejuízo por Cobrar Abaixo?;Tempo Médio Gasto por Orçamento;Importância de Melhorar (1 a 5);ARNIX Resolveria o Problema?;Utilizaria a Ferramenta?;Frequência de Uso Estimada;Disposição a Pagar Mensal (WTP);Contato / Lead VIP (Opcional)\n';
+  csv += 'ID da Resposta;Data/Hora de Registro;Relação com o Negócio;Porte da Empresa;Segmento de Atuação;Método Atual de Precificação;Ferramenta Específica Atual;Frequência da Dificuldade (1 a 5);Maiores Dores / Gargalos;Já Perdeu Venda por Preço Alto?;Já Teve Prejuízo por Cobrar Abaixo?;Tempo Médio Gasto por Orçamento;Importância de Melhorar (1 a 5);ARNIX Resolveria o Problema?;Fatores Decisivos de Migração;Utilizaria a Ferramenta?;Frequência de Uso Estimada;Disposição a Pagar Mensal (WTP);Contato / Lead VIP (Opcional)\n';
 
   allResponses.forEach(r => {
     const dores = Array.isArray(r.dificuldades) ? r.dificuldades.join(', ') : (r.dificuldades || 'Nenhuma informada');
-    csv += `"${r.id || ''}";"${r.criado_em || ''}";"${r.relacao_negocio || ''}";"${r.porte_negocio || ''}";"${r.segmento || ''}";"${r.metodo_atual || ''}";"${r.frequencia_dificuldade || ''}/5";"${dores}";"${r.perdeu_venda_preco_alto || ''}";"${r.teve_prejuizo_preco_baixo || ''}";"${r.tempo_gasto || ''}";"${r.importancia_melhorar || ''}/5";"${r.resolveria_problema || ''}";"${r.utilizaria_ferramenta || ''}";"${r.frequencia_uso || ''}";"${r.disposicao_pagamento || ''}";"${r.lead_contato || 'Anônimo'}"\n`;
+    const fatores = Array.isArray(r.fatores_substituicao) ? r.fatores_substituicao.join(', ') : (r.fatores_substituicao || 'Não informado');
+    csv += `"${r.id || ''}";"${r.criado_em || ''}";"${r.relacao_negocio || ''}";"${r.porte_negocio || ''}";"${r.segmento || ''}";"${r.metodo_atual || ''}";"${r.ferramenta_especifica || 'Nenhuma'}";"${r.frequencia_dificuldade || ''}/5";"${dores}";"${r.perdeu_venda_preco_alto || ''}";"${r.teve_prejuizo_preco_baixo || ''}";"${r.tempo_gasto || ''}";"${r.importancia_melhorar || ''}/5";"${r.resolveria_problema || ''}";"${fatores}";"${r.utilizaria_ferramenta || ''}";"${r.frequencia_uso || ''}";"${r.disposicao_pagamento || ''}";"${r.lead_contato || 'Anônimo'}"\n`;
   });
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -491,6 +571,7 @@ function exportDataCSV() {
 }
 
 /* ── 6.1 IMPRIMIR / GERAR RELATÓRIO EXECUTIVO PDF ─────────── */
+
 function printExecutiveReportPDF() {
   const printDateEl = document.getElementById('printDate');
   if (printDateEl) {

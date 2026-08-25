@@ -95,13 +95,15 @@ def init_database():
                 porte_negocio VARCHAR(100),
                 segmento VARCHAR(100),
                 metodo_atual VARCHAR(100),
+                ferramenta_especifica VARCHAR(100),
                 frequencia_dificuldade INT,
                 dificuldades TEXT,
-                perdeu_venda_preco_alto VARCHAR(20),
-                teve_prejuizo_preco_baixo VARCHAR(20),
+                perdeu_venda_preco_alto VARCHAR(50),
+                teve_prejuizo_preco_baixo VARCHAR(50),
                 tempo_gasto VARCHAR(50),
                 importancia_melhorar INT,
                 resolveria_problema VARCHAR(100),
+                fatores_substituicao TEXT,
                 utilizaria_ferramenta VARCHAR(100),
                 frequencia_uso VARCHAR(100),
                 disposicao_pagamento VARCHAR(100),
@@ -115,6 +117,12 @@ def init_database():
                 END IF;
                 IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='respostas_pesquisa' AND column_name='fingerprint_hash') THEN
                     ALTER TABLE respostas_pesquisa ADD COLUMN fingerprint_hash VARCHAR(64);
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='respostas_pesquisa' AND column_name='ferramenta_especifica') THEN
+                    ALTER TABLE respostas_pesquisa ADD COLUMN ferramenta_especifica VARCHAR(100);
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='respostas_pesquisa' AND column_name='fatores_substituicao') THEN
+                    ALTER TABLE respostas_pesquisa ADD COLUMN fatores_substituicao TEXT;
                 END IF;
             END $$;
             CREATE INDEX IF NOT EXISTS idx_fingerprint ON respostas_pesquisa(fingerprint_hash);
@@ -139,6 +147,7 @@ def init_database():
                 porte_negocio TEXT,
                 segmento TEXT,
                 metodo_atual TEXT,
+                ferramenta_especifica TEXT,
                 frequencia_dificuldade INTEGER,
                 dificuldades TEXT,
                 perdeu_venda_preco_alto TEXT,
@@ -146,6 +155,7 @@ def init_database():
                 tempo_gasto TEXT,
                 importancia_melhorar INTEGER,
                 resolveria_problema TEXT,
+                fatores_substituicao TEXT,
                 utilizaria_ferramenta TEXT,
                 frequencia_uso TEXT,
                 disposicao_pagamento TEXT,
@@ -160,6 +170,10 @@ def init_database():
                 cursor.execute("ALTER TABLE respostas_pesquisa ADD COLUMN client_uuid TEXT;")
             if "fingerprint_hash" not in cols:
                 cursor.execute("ALTER TABLE respostas_pesquisa ADD COLUMN fingerprint_hash TEXT;")
+            if "ferramenta_especifica" not in cols:
+                cursor.execute("ALTER TABLE respostas_pesquisa ADD COLUMN ferramenta_especifica TEXT;")
+            if "fatores_substituicao" not in cols:
+                cursor.execute("ALTER TABLE respostas_pesquisa ADD COLUMN fatores_substituicao TEXT;")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_sqlite_fp ON respostas_pesquisa(fingerprint_hash);")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_sqlite_lead ON respostas_pesquisa(lead_contato);")
             conn.commit()
@@ -183,6 +197,8 @@ def insert_resposta(resp: Dict[str, Any]) -> Dict[str, Any]:
     lead_contato = (resp.get("lead_contato") or "").strip()
     fingerprint = calculate_fingerprint(resp)
     dificuldades_json = json.dumps(resp.get("dificuldades", []), ensure_ascii=False)
+    fatores_json = json.dumps(resp.get("fatores_substituicao", []), ensure_ascii=False)
+    ferramenta = resp.get("ferramenta_especifica") or ""
 
     # 1. VERIFICAÇÃO NO POSTGRESQL (VERCEL)
     if IS_POSTGRES:
@@ -211,17 +227,17 @@ def insert_resposta(resp: Dict[str, Any]) -> Dict[str, Any]:
             cursor.execute("""
             INSERT INTO respostas_pesquisa (
                 id, client_uuid, fingerprint_hash, relacao_negocio, porte_negocio, segmento, metodo_atual,
-                frequencia_dificuldade, dificuldades, perdeu_venda_preco_alto,
+                ferramenta_especifica, frequencia_dificuldade, dificuldades, perdeu_venda_preco_alto,
                 teve_prejuizo_preco_baixo, tempo_gasto, importancia_melhorar,
-                resolveria_problema, utilizaria_ferramenta, frequencia_uso,
+                resolveria_problema, fatores_substituicao, utilizaria_ferramenta, frequencia_uso,
                 disposicao_pagamento, lead_contato, criado_em
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 resp_id, client_uuid, fingerprint, resp.get("relacao_negocio"), resp.get("porte_negocio"), resp.get("segmento"),
-                resp.get("metodo_atual"), resp.get("frequencia_dificuldade"), dificuldades_json,
+                resp.get("metodo_atual"), ferramenta, resp.get("frequencia_dificuldade"), dificuldades_json,
                 resp.get("perdeu_venda_preco_alto"), resp.get("teve_prejuizo_preco_baixo"),
                 resp.get("tempo_gasto"), resp.get("importancia_melhorar"), resp.get("resolveria_problema"),
-                resp.get("utilizaria_ferramenta"), resp.get("frequencia_uso"),
+                fatores_json, resp.get("utilizaria_ferramenta"), resp.get("frequencia_uso"),
                 resp.get("disposicao_pagamento"), lead_contato, resp.get("criado_em")
             ))
             conn.commit()
@@ -255,17 +271,17 @@ def insert_resposta(resp: Dict[str, Any]) -> Dict[str, Any]:
         cursor.execute("""
         INSERT INTO respostas_pesquisa (
             id, client_uuid, fingerprint_hash, relacao_negocio, porte_negocio, segmento, metodo_atual,
-            frequencia_dificuldade, dificuldades, perdeu_venda_preco_alto,
+            ferramenta_especifica, frequencia_dificuldade, dificuldades, perdeu_venda_preco_alto,
             teve_prejuizo_preco_baixo, tempo_gasto, importancia_melhorar,
-            resolveria_problema, utilizaria_ferramenta, frequencia_uso,
+            resolveria_problema, fatores_substituicao, utilizaria_ferramenta, frequencia_uso,
             disposicao_pagamento, lead_contato, criado_em
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             resp_id, client_uuid, fingerprint, resp.get("relacao_negocio"), resp.get("porte_negocio"), resp.get("segmento"),
-            resp.get("metodo_atual"), resp.get("frequencia_dificuldade"), dificuldades_json,
+            resp.get("metodo_atual"), ferramenta, resp.get("frequencia_dificuldade"), dificuldades_json,
             resp.get("perdeu_venda_preco_alto"), resp.get("teve_prejuizo_preco_baixo"),
             resp.get("tempo_gasto"), resp.get("importancia_melhorar"), resp.get("resolveria_problema"),
-            resp.get("utilizaria_ferramenta"), resp.get("frequencia_uso"),
+            fatores_json, resp.get("utilizaria_ferramenta"), resp.get("frequencia_uso"),
             resp.get("disposicao_pagamento"), lead_contato, resp.get("criado_em")
         ))
         conn.commit()
@@ -291,29 +307,37 @@ def get_all_respostas() -> List[Dict[str, Any]]:
             for r in rows:
                 dificuldades_list = []
                 try:
-                    dificuldades_list = json.loads(r["dificuldades"]) if r["dificuldades"] else []
+                    dificuldades_list = json.loads(r["dificuldades"]) if r.get("dificuldades") else []
+                except Exception:
+                    pass
+
+                fatores_list = []
+                try:
+                    fatores_list = json.loads(r["fatores_substituicao"]) if r.get("fatores_substituicao") else []
                 except Exception:
                     pass
 
                 respostas.append({
                     "id": r["id"],
                     "client_uuid": r.get("client_uuid") or "",
-                    "relacao_negocio": r["relacao_negocio"] or "",
-                    "porte_negocio": r["porte_negocio"] or "",
-                    "segmento": r["segmento"] or "",
-                    "metodo_atual": r["metodo_atual"] or "",
-                    "frequencia_dificuldade": r["frequencia_dificuldade"] or 3,
+                    "relacao_negocio": r.get("relacao_negocio") or "",
+                    "porte_negocio": r.get("porte_negocio") or "",
+                    "segmento": r.get("segmento") or "",
+                    "metodo_atual": r.get("metodo_atual") or "",
+                    "ferramenta_especifica": r.get("ferramenta_especifica") or "",
+                    "frequencia_dificuldade": r.get("frequencia_dificuldade") or 3,
                     "dificuldades": dificuldades_list,
-                    "perdeu_venda_preco_alto": r["perdeu_venda_preco_alto"] or "",
-                    "teve_prejuizo_preco_baixo": r["teve_prejuizo_preco_baixo"] or "",
-                    "tempo_gasto": r["tempo_gasto"] or "",
-                    "importancia_melhorar": r["importancia_melhorar"] or 3,
-                    "resolveria_problema": r["resolveria_problema"] or "",
-                    "utilizaria_ferramenta": r["utilizaria_ferramenta"] or "",
-                    "frequencia_uso": r["frequencia_uso"] or "",
-                    "disposicao_pagamento": r["disposicao_pagamento"] or "",
-                    "lead_contato": r["lead_contato"] or "",
-                    "criado_em": r["criado_em"] or ""
+                    "perdeu_venda_preco_alto": r.get("perdeu_venda_preco_alto") or "",
+                    "teve_prejuizo_preco_baixo": r.get("teve_prejuizo_preco_baixo") or "",
+                    "tempo_gasto": r.get("tempo_gasto") or "",
+                    "importancia_melhorar": r.get("importancia_melhorar") or 3,
+                    "resolveria_problema": r.get("resolveria_problema") or "",
+                    "fatores_substituicao": fatores_list,
+                    "utilizaria_ferramenta": r.get("utilizaria_ferramenta") or "",
+                    "frequencia_uso": r.get("frequencia_uso") or "",
+                    "disposicao_pagamento": r.get("disposicao_pagamento") or "",
+                    "lead_contato": r.get("lead_contato") or "",
+                    "criado_em": r.get("criado_em") or ""
                 })
             return respostas
         except Exception as e:
@@ -330,7 +354,13 @@ def get_all_respostas() -> List[Dict[str, Any]]:
         for r in rows:
             dificuldades_list = []
             try:
-                dificuldades_list = json.loads(r["dificuldades"]) if r["dificuldades"] else []
+                dificuldades_list = json.loads(r["dificuldades"]) if "dificuldades" in r.keys() and r["dificuldades"] else []
+            except Exception:
+                pass
+
+            fatores_list = []
+            try:
+                fatores_list = json.loads(r["fatores_substituicao"]) if "fatores_substituicao" in r.keys() and r["fatores_substituicao"] else []
             except Exception:
                 pass
 
@@ -341,6 +371,7 @@ def get_all_respostas() -> List[Dict[str, Any]]:
                 "porte_negocio": r["porte_negocio"] or "",
                 "segmento": r["segmento"] or "",
                 "metodo_atual": r["metodo_atual"] or "",
+                "ferramenta_especifica": r["ferramenta_especifica"] if "ferramenta_especifica" in r.keys() and r["ferramenta_especifica"] else "",
                 "frequencia_dificuldade": r["frequencia_dificuldade"] or 3,
                 "dificuldades": dificuldades_list,
                 "perdeu_venda_preco_alto": r["perdeu_venda_preco_alto"] or "",
@@ -348,6 +379,7 @@ def get_all_respostas() -> List[Dict[str, Any]]:
                 "tempo_gasto": r["tempo_gasto"] or "",
                 "importancia_melhorar": r["importancia_melhorar"] or 3,
                 "resolveria_problema": r["resolveria_problema"] or "",
+                "fatores_substituicao": fatores_list,
                 "utilizaria_ferramenta": r["utilizaria_ferramenta"] or "",
                 "frequencia_uso": r["frequencia_uso"] or "",
                 "disposicao_pagamento": r["disposicao_pagamento"] or "",
@@ -356,6 +388,7 @@ def get_all_respostas() -> List[Dict[str, Any]]:
             })
     except Exception as e:
         print(f" [!] Erro ao listar do SQLite: {e}")
+
 
     return respostas
 

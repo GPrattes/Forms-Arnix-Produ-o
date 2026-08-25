@@ -32,6 +32,8 @@ SMTP_FROM = os.environ.get("SMTP_FROM", NOTIFY_EMAIL).strip()
 def format_notification_body(resp: Dict[str, Any], total_count: int) -> str:
     agora = datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M:%S UTC')
     dores = ", ".join(resp.get("dificuldades", [])) if resp.get("dificuldades") else "Nenhuma dor selecionada"
+    fatores = ", ".join(resp.get("fatores_substituicao", [])) if resp.get("fatores_substituicao") else "Nenhum fator informado"
+    ferramenta = resp.get("ferramenta_especifica") or "Nenhuma / Não especificado"
     lead = resp.get("lead_contato") or "Anônimo (Não informou contato)"
     
     return f"""
@@ -48,6 +50,7 @@ def format_notification_body(resp: Dict[str, Any], total_count: int) -> str:
 
 💡 DIAGNÓSTICO DE PRECIFICAÇÃO:
 • Método Atual: {resp.get('metodo_atual', 'N/A')}
+• Ferramenta Atual Utilizada: {ferramenta}
 • Nível de Dificuldade (1 a 5): {resp.get('frequencia_dificuldade', 'N/A')}/5
 • Maiores Dores: {dores}
 • Já Perdeu Venda por Preço Alto?: {resp.get('perdeu_venda_preco_alto', 'N/A')}
@@ -56,6 +59,7 @@ def format_notification_body(resp: Dict[str, Any], total_count: int) -> str:
 
 🎯 ADESÃO & VALIDAÇÃO COMERCIAL:
 • ARNIX Resolveria o Problema?: {resp.get('resolveria_problema', 'N/A')}
+• Fatores Decisivos de Troca/Migração: {fatores}
 • Utilizaria a Ferramenta?: {resp.get('utilizaria_ferramenta', 'N/A')}
 • Frequência de Uso Estimada: {resp.get('frequencia_uso', 'N/A')}
 • Disposição a Pagar Mensal (WTP): {resp.get('disposicao_pagamento', 'N/A')}
@@ -66,6 +70,7 @@ def format_notification_body(resp: Dict[str, Any], total_count: int) -> str:
 🏢 ARNIX Platform • Prattes Technologies / Orbb Tecnologia & Consultoria
 Painel: https://forms-arnix-produ-o.vercel.app/dashboard
 """
+
 
 def send_notification(resp: Dict[str, Any], total_count: int) -> bool:
     """Dispara a notificação através de múltiplos canais redundantes."""

@@ -15,6 +15,7 @@ const surveyData = {
 
   // Etapa 2
   metodo_atual: '',
+  ferramenta_especifica: '',
   frequencia_dificuldade: null,
   dificuldades: [],
 
@@ -26,6 +27,7 @@ const surveyData = {
 
   // Etapa 4
   resolveria_problema: '',
+  fatores_substituicao: [],
 
   // Etapa 5
   utilizaria_ferramenta: '',
@@ -141,6 +143,9 @@ function validateAndNext(currentStep, nextStepNumber) {
     if (!surveyData.metodo_atual) {
       isValid = false;
       errorMsg = 'Por favor, selecione como você define o preço atualmente.';
+    } else if (!surveyData.ferramenta_especifica) {
+      isValid = false;
+      errorMsg = 'Por favor, informe se utiliza alguma ferramenta específica para auxiliar na precificação.';
     } else if (!surveyData.frequencia_dificuldade) {
       isValid = false;
       errorMsg = 'Por favor, informe na escala de 1 a 5 a frequência da dificuldade.';
@@ -235,12 +240,14 @@ async function submitSurvey() {
         Porte_Empresa: surveyData.porte_negocio,
         Segmento: surveyData.segmento,
         Metodo_Atual: surveyData.metodo_atual,
+        Ferramenta_Atual: surveyData.ferramenta_especifica || 'Nenhuma',
         Dificuldade_1a5: surveyData.frequencia_dificuldade,
         Dores_Citadas: (surveyData.dificuldades || []).join(', ') || 'Nenhuma',
         Perdeu_Venda_Preco_Alto: surveyData.perdeu_venda_preco_alto,
         Teve_Prejuizo_Preco_Baixo: surveyData.teve_prejuizo_preco_baixo,
         Tempo_Gasto_Orcamento: surveyData.tempo_gasto,
         ARNIX_Resolveria: surveyData.resolveria_problema,
+        Fatores_Decisivos_Migracao: (surveyData.fatores_substituicao || []).join(', ') || 'Não informado',
         Utilizaria_Ferramenta: surveyData.utilizaria_ferramenta,
         Frequencia_Uso: surveyData.frequencia_uso,
         Disposicao_Pagamento_WTP: surveyData.disposicao_pagamento,

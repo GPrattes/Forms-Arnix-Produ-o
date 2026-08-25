@@ -105,6 +105,7 @@ class RespostaSurvey(BaseModel):
     porte_negocio: str
     segmento: str
     metodo_atual: str
+    ferramenta_especifica: Optional[str] = None
     frequencia_dificuldade: int
     dificuldades: List[str] = Field(default_factory=list)
     perdeu_venda_preco_alto: str
@@ -112,11 +113,13 @@ class RespostaSurvey(BaseModel):
     tempo_gasto: str
     importancia_melhorar: int
     resolveria_problema: str
+    fatores_substituicao: List[str] = Field(default_factory=list)
     utilizaria_ferramenta: str
     frequencia_uso: str
     disposicao_pagamento: str
     lead_contato: Optional[str] = None
     criado_em: Optional[str] = None
+
 
 # GET /api/respostas (or root of function)
 @app.get("/")
