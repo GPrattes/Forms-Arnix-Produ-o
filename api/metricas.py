@@ -38,9 +38,9 @@ def verify_admin(
     authorization: Optional[str] = Header(None)
 ):
     token = None
-    if x_admin_key:
+    if isinstance(x_admin_key, str) and x_admin_key.strip():
         token = x_admin_key.strip()
-    elif authorization and authorization.startswith("Bearer "):
+    elif isinstance(authorization, str) and authorization.startswith("Bearer "):
         token = authorization.split("Bearer ", 1)[1].strip()
 
     admin_key = get_admin_secret_key()
@@ -50,6 +50,7 @@ def verify_admin(
             detail="Acesso Negado. Autenticação de administrador obrigatória."
         )
     return True
+
 
 
 @app.get("/")

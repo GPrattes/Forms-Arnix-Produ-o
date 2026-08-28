@@ -144,9 +144,9 @@ def verify_admin_token(
 ):
     """Garante que apenas o administrador autenticado possa ler o banco de dados e métricas."""
     token = None
-    if x_admin_key:
+    if isinstance(x_admin_key, str) and x_admin_key.strip():
         token = x_admin_key.strip()
-    elif authorization and authorization.startswith("Bearer "):
+    elif isinstance(authorization, str) and authorization.startswith("Bearer "):
         token = authorization.split("Bearer ", 1)[1].strip()
 
     admin_key = get_admin_secret_key()
@@ -156,6 +156,7 @@ def verify_admin_token(
             detail="Acesso Negado. Apenas o administrador autenticado da Prattes Technologies pode acessar os dados da pesquisa."
         )
     return True
+
 
 # ── ROTAS VISUAIS / PÁGINAS ESTÁTICAS ────────────────────────
 @app.get("/", include_in_schema=False)

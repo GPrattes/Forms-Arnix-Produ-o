@@ -79,9 +79,9 @@ def verify_admin(
     authorization: Optional[str] = Header(None)
 ):
     token = None
-    if x_admin_key:
+    if isinstance(x_admin_key, str) and x_admin_key.strip():
         token = x_admin_key.strip()
-    elif authorization and authorization.startswith("Bearer "):
+    elif isinstance(authorization, str) and authorization.startswith("Bearer "):
         token = authorization.split("Bearer ", 1)[1].strip()
 
     if not token:
@@ -94,6 +94,7 @@ def verify_admin(
             detail="Acesso Negado. Apenas o administrador autenticado da Prattes Technologies pode acessar os dados da pesquisa."
         )
     return True
+
 
 
 class RespostaSurvey(BaseModel):
