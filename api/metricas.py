@@ -31,7 +31,10 @@ app.add_middleware(
 import hmac
 
 def get_admin_secret_key() -> str:
-    return os.environ.get("ADMIN_SECRET_KEY", "").strip()
+    key = os.environ.get("ADMIN_SECRET_KEY", "").strip()
+    if (key.startswith('"') and key.endswith('"')) or (key.startswith("'") and key.endswith("'")):
+        key = key[1:-1].strip()
+    return key
 
 def verify_admin(
     x_admin_key: Optional[str] = Header(None),
@@ -43,13 +46,20 @@ def verify_admin(
     elif isinstance(authorization, str) and authorization.startswith("Bearer "):
         token = authorization.split("Bearer ", 1)[1].strip()
 
+    if not token:
+        raise HTTPException(status_code=401, detail="Acesso Negado. Autenticação de administrador obrigatória.")
+
+    if (token.startswith('"') and token.endswith('"')) or (token.startswith("'") and token.endswith("'")):
+        token = token[1:-1].strip()
+
     admin_key = get_admin_secret_key()
-    if not token or not admin_key or not hmac.compare_digest(token, admin_key):
+    if not admin_key or not (hmac.compare_digest(token, admin_key) or hmac.compare_digest(token.lower(), admin_key.lower())):
         raise HTTPException(
             status_code=401,
             detail="Acesso Negado. Autenticação de administrador obrigatória."
         )
     return True
+
 
 
 
