@@ -35,8 +35,11 @@ jobs:
           python -m py_compile api/index.py
 
       - name: Executar Teste Funcional dos Endpoints & Segurança
+        env:
+          ADMIN_SECRET_KEY: ${{ secrets.ADMIN_SECRET_KEY || 'ci_test_secret_key_2026' }}
         run: |
-          python -c "import sys; sys.path.insert(0, 'backend'); from fastapi.testclient import TestClient; from server import app; client = TestClient(app); assert client.get('/').status_code == 200; assert client.get('/dashboard').status_code == 200; assert client.get('/sobre').status_code == 200; assert client.get('/fundador').status_code == 200; assert client.get('/api/metricas').status_code == 401, 'Deveria bloquear sem token'; assert client.get('/api/metricas', headers={'x-admin-key': 'Prattes@Arnix2026!Master'}).status_code == 200, 'Deveria permitir com token admin'; print('[OK] Todos os endpoints do forms responderam e a segurança está 100% ativa!')"
+          python -c "import sys, os; sys.path.insert(0, 'backend'); from fastapi.testclient import TestClient; from server import app; client = TestClient(app); admin_key = os.environ.get('ADMIN_SECRET_KEY', 'ci_test_secret_key_2026'); assert client.get('/').status_code == 200; assert client.get('/dashboard').status_code == 200; assert client.get('/sobre').status_code == 200; assert client.get('/fundador').status_code == 200; assert client.get('/api/metricas').status_code == 401, 'Deveria bloquear sem token'; assert client.get('/api/metricas', headers={'x-admin-key': admin_key}).status_code == 200, 'Deveria permitir com token admin'; print('[OK] Todos os endpoints do forms responderam e a segurança está 100% ativa!')"
+
 
   deploy-check:
     name: 🚀 Vercel & Production Verification
