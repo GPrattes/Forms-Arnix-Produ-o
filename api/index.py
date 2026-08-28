@@ -136,10 +136,24 @@ async def test_get_route():
 
 # ── GUARDA DE SEGURANÇA DO ADMINISTRADOR ───────────────────────
 def get_admin_secret_key() -> str:
-    key = os.environ.get("ADMIN_SECRET_KEY", "").strip()
-    if (key.startswith('"') and key.endswith('"')) or (key.startswith("'") and key.endswith("'")):
-        key = key[1:-1].strip()
-    return key
+    candidates = [
+        "ADMIN_SECRET_KEY",
+        "ADMIN_KEY",
+        "ADMIN_PASSWORD",
+        "SECRET_KEY",
+        "SENHA_ADMIN",
+        "CHAVE_ADMIN",
+        "ADMIN_TOKEN",
+        "AUTH_KEY"
+    ]
+    for var_name in candidates:
+        val = os.environ.get(var_name, "").strip()
+        if val:
+            if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
+                val = val[1:-1].strip()
+            if val:
+                return val
+    return ""
 
 def verify_admin_token(
     x_admin_key: Optional[str] = Header(None),
@@ -155,19 +169,26 @@ def verify_admin_token(
     if not token:
         raise HTTPException(
             status_code=401,
-            detail="Acesso Negado. Token de administrador não fornecido."
+            detail="Acesso Negado: Token de administrador não fornecido."
         )
 
     if (token.startswith('"') and token.endswith('"')) or (token.startswith("'") and token.endswith("'")):
         token = token[1:-1].strip()
 
     admin_key = get_admin_secret_key()
-    if not admin_key or not (hmac.compare_digest(token, admin_key) or hmac.compare_digest(token.lower(), admin_key.lower())):
+    if not admin_key:
         raise HTTPException(
             status_code=401,
-            detail="Acesso Negado. Apenas o administrador autenticado da Prattes Technologies pode acessar os dados da pesquisa."
+            detail="Configuração ausente: A variável ADMIN_SECRET_KEY não foi encontrada no ambiente da Vercel. Adicione-a em Project Settings > Environment Variables e faça o Redeploy."
+        )
+
+    if not (hmac.compare_digest(token, admin_key) or hmac.compare_digest(token.lower(), admin_key.lower())):
+        raise HTTPException(
+            status_code=401,
+            detail="Chave de administrador incorreta. Verifique a senha digitada."
         )
     return True
+
 
 
 

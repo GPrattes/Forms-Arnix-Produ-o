@@ -24,8 +24,8 @@ async function checkAdminAuth() {
 
   const token = getAdminToken();
   if (token) {
-    const success = await loadDataAndRender();
-    if (success) {
+    const res = await loadDataAndRender();
+    if (res.success) {
       sessionStorage.setItem('arnix_admin_auth', 'true');
       const overlay = document.getElementById('adminAuthOverlay');
       if (overlay) overlay.style.display = 'none';
@@ -48,7 +48,10 @@ async function handleAdminLogin(event) {
   const val = input ? input.value.trim() : '';
 
   if (!val) {
-    if (errorEl) errorEl.style.display = 'block';
+    if (errorEl) {
+      errorEl.textContent = 'Por favor, digite a chave de acesso.';
+      errorEl.style.display = 'block';
+    }
     return;
   }
 
@@ -59,9 +62,9 @@ async function handleAdminLogin(event) {
 
   try {
     sessionStorage.setItem('arnix_admin_auth_token', val);
-    const success = await loadDataAndRender();
+    const result = await loadDataAndRender(val);
     
-    if (success) {
+    if (result.success) {
       sessionStorage.setItem('arnix_admin_auth', 'true');
       const overlay = document.getElementById('adminAuthOverlay');
       if (overlay) overlay.style.display = 'none';
@@ -69,11 +72,17 @@ async function handleAdminLogin(event) {
     } else {
       sessionStorage.removeItem('arnix_admin_auth');
       sessionStorage.removeItem('arnix_admin_auth_token');
-      if (errorEl) errorEl.style.display = 'block';
+      if (errorEl) {
+        errorEl.textContent = result.message || 'Chave incorreta. Tente novamente.';
+        errorEl.style.display = 'block';
+      }
       if (input) input.value = '';
     }
   } catch (err) {
-    if (errorEl) errorEl.style.display = 'block';
+    if (errorEl) {
+      errorEl.textContent = 'Erro de comunicação com o servidor.';
+      errorEl.style.display = 'block';
+    }
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
@@ -103,9 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ── 1. CARREGAMENTO DE DADOS (API OU LOCALSTORAGE OU SEED) ── */
-async function loadDataAndRender() {
-  const token = getAdminToken();
-  if (!token) return false;
+async function loadDataAndRender(customToken) {
+  const token = customToken || getAdminToken();
+  if (!token) return { success: false, message: 'Chave de administrador não fornecida.' };
 
   try {
     const res = await fetch('/api/respostas', {
@@ -116,34 +125,46 @@ async function loadDataAndRender() {
     });
 
     if (res.status === 401) {
-      return false;
+      let detail = 'Chave incorreta. Tente novamente.';
+      try {
+        const errJson = await res.json();
+        if (errJson && errJson.detail) {
+          detail = errJson.detail;
+        }
+      } catch (_) {}
+      return { success: false, message: detail };
     }
 
     if (res.ok) {
       allResponses = await res.json();
       localStorage.setItem('arnix_survey_responses', JSON.stringify(allResponses));
+      calculateAndRenderMetrics();
+      renderCharts();
+      renderResponsesTable();
+      return { success: true, message: '' };
     } else {
       const local = localStorage.getItem('arnix_survey_responses');
       if (local) {
         allResponses = JSON.parse(local);
+        calculateAndRenderMetrics();
+        renderCharts();
+        renderResponsesTable();
       }
+      return { success: true, message: '' };
     }
   } catch (e) {
     const local = localStorage.getItem('arnix_survey_responses');
     if (local) {
       allResponses = JSON.parse(local);
+      calculateAndRenderMetrics();
+      renderCharts();
+      renderResponsesTable();
+      return { success: true, message: '' };
     }
+    return { success: false, message: 'Falha ao conectar com o servidor.' };
   }
-
-  if (!allResponses) {
-    allResponses = [];
-  }
-
-  calculateAndRenderMetrics();
-  renderCharts();
-  renderResponsesTable();
-  return true;
 }
+
 
 
 async function clearDatabase() {
