@@ -9,25 +9,28 @@
 let allResponses = [];
 let chartInstances = {};
 
-const VALID_ADMIN_KEYS = ['prattes@arnix2026!master', 'arnix2026', 'prattes2026', 'admin2026'];
-
-document.addEventListener('DOMContentLoaded', () => {
-  checkAdminAuth();
-  initTheme();
-});
-
-/* ── 0. PROTEÇÃO & AUTENTICAÇÃO DO ADMINISTRADOR ───────────── */
+/* ── 0. PROTEÇÃO & AUTENTICAÇÃO DO ADMINISTRADOR (ZERO-TRUST) ─ */
 function getAdminToken() {
   return sessionStorage.getItem('arnix_admin_auth_token') || localStorage.getItem('arnix_admin_auth_token') || '';
 }
 
-function checkAdminAuth() {
+async function checkAdminAuth() {
   const urlParams = new URLSearchParams(window.location.search);
   const keyParam = urlParams.get('key');
   
-  if (keyParam && VALID_ADMIN_KEYS.includes(keyParam.toLowerCase())) {
+  if (keyParam) {
     sessionStorage.setItem('arnix_admin_auth_token', keyParam);
-    sessionStorage.setItem('arnix_admin_auth', 'true');
+  }
+
+  const token = getAdminToken();
+  if (token) {
+    const success = await loadDataAndRender();
+    if (success) {
+      sessionStorage.setItem('arnix_admin_auth', 'true');
+      const overlay = document.getElementById('adminAuthOverlay');
+      if (overlay) overlay.style.display = 'none';
+      return;
+    }
   }
 
   const isAuth = sessionStorage.getItem('arnix_admin_auth') === 'true';
@@ -35,31 +38,51 @@ function checkAdminAuth() {
   if (overlay) {
     overlay.style.display = isAuth ? 'none' : 'flex';
   }
-
-  if (isAuth) {
-    loadDataAndRender();
-  }
 }
 
 async function handleAdminLogin(event) {
   event.preventDefault();
   const input = document.getElementById('adminPasskeyInput');
   const errorEl = document.getElementById('adminLoginError');
+  const submitBtn = event.target ? event.target.querySelector('button[type="submit"]') : null;
   const val = input ? input.value.trim() : '';
 
-  if (VALID_ADMIN_KEYS.includes(val.toLowerCase())) {
-    sessionStorage.setItem('arnix_admin_auth_token', val);
-    sessionStorage.setItem('arnix_admin_auth', 'true');
-    const overlay = document.getElementById('adminAuthOverlay');
-    if (overlay) overlay.style.display = 'none';
-    if (errorEl) errorEl.style.display = 'none';
-    await loadDataAndRender();
-  } else {
+  if (!val) {
     if (errorEl) errorEl.style.display = 'block';
-    if (input) input.value = '';
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verificando...';
+  }
+
+  try {
+    sessionStorage.setItem('arnix_admin_auth_token', val);
+    const success = await loadDataAndRender();
+    
+    if (success) {
+      sessionStorage.setItem('arnix_admin_auth', 'true');
+      const overlay = document.getElementById('adminAuthOverlay');
+      if (overlay) overlay.style.display = 'none';
+      if (errorEl) errorEl.style.display = 'none';
+    } else {
+      sessionStorage.removeItem('arnix_admin_auth');
+      sessionStorage.removeItem('arnix_admin_auth_token');
+      if (errorEl) errorEl.style.display = 'block';
+      if (input) input.value = '';
+    }
+  } catch (err) {
+    if (errorEl) errorEl.style.display = 'block';
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Acessar Painel';
+    }
   }
 }
 window.handleAdminLogin = handleAdminLogin;
+
 
 function adminLogout() {
   sessionStorage.removeItem('arnix_admin_auth');
@@ -74,9 +97,16 @@ function adminLogout() {
 }
 window.adminLogout = adminLogout;
 
+document.addEventListener('DOMContentLoaded', () => {
+  checkAdminAuth();
+  initTheme();
+});
+
 /* ── 1. CARREGAMENTO DE DADOS (API OU LOCALSTORAGE OU SEED) ── */
 async function loadDataAndRender() {
   const token = getAdminToken();
+  if (!token) return false;
+
   try {
     const res = await fetch('/api/respostas', {
       headers: {
@@ -84,6 +114,11 @@ async function loadDataAndRender() {
         'Authorization': 'Bearer ' + token
       }
     });
+
+    if (res.status === 401) {
+      return false;
+    }
+
     if (res.ok) {
       allResponses = await res.json();
       localStorage.setItem('arnix_survey_responses', JSON.stringify(allResponses));
@@ -107,7 +142,9 @@ async function loadDataAndRender() {
   calculateAndRenderMetrics();
   renderCharts();
   renderResponsesTable();
+  return true;
 }
+
 
 async function clearDatabase() {
   if (!confirm('⚠️ ATENÇÃO: Deseja realmente apagar TODAS as respostas do banco de dados e zerar as métricas? Esta ação é irreversível.')) {

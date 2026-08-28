@@ -12,8 +12,10 @@ import os
 import sys
 import io
 import csv
+import hmac
 from typing import List, Optional
 from datetime import datetime, timezone
+
 from pydantic import BaseModel, Field
 
 # Garante suporte UTF-8 no Windows
@@ -83,8 +85,8 @@ app.add_middleware(
 )
 
 # ── GUARDA DE SEGURANÇA DO ADMINISTRADOR ───────────────────────
-ADMIN_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY", "Prattes@Arnix2026!Master")
-VALID_ADMIN_KEYS = {ADMIN_SECRET_KEY, "Prattes@Arnix2026!Master", "arnix2026", "prattes2026"}
+def get_admin_secret_key() -> str:
+    return os.environ.get("ADMIN_SECRET_KEY", "").strip()
 
 def verify_admin_token(
     x_admin_key: Optional[str] = Header(None),
@@ -97,7 +99,8 @@ def verify_admin_token(
     elif authorization and authorization.startswith("Bearer "):
         token = authorization.split("Bearer ", 1)[1].strip()
 
-    if not token or token not in VALID_ADMIN_KEYS:
+    admin_key = get_admin_secret_key()
+    if not token or not admin_key or not hmac.compare_digest(token, admin_key):
         raise HTTPException(
             status_code=401,
             detail="Acesso Negado. Apenas o administrador autenticado pode acessar os dados da pesquisa."
@@ -126,11 +129,26 @@ async def serve_sobre():
 async def serve_fundador():
     return FileResponse(os.path.join(FRONTEND_DIR, "fundador.html"))
 
+@app.get("/obrigado", include_in_schema=False)
+@app.get("/obrigado.html", include_in_schema=False)
+async def serve_obrigado():
+    return FileResponse(os.path.join(FRONTEND_DIR, "obrigado.html"))
+
+@app.get("/politica-privacidade", include_in_schema=False)
+@app.get("/politica-privacidade.html", include_in_schema=False)
+async def serve_privacidade():
+    return FileResponse(os.path.join(FRONTEND_DIR, "politica-privacidade.html"))
+
+@app.get("/termos-uso", include_in_schema=False)
+@app.get("/termos-uso.html", include_in_schema=False)
+async def serve_termos():
+    return FileResponse(os.path.join(FRONTEND_DIR, "termos-uso.html"))
+
 @app.get("/favicon.ico", include_in_schema=False)
 async def serve_favicon():
-    favicon_path = os.path.join(IMG_DIR, "arnix-sgv.png")
-    if os.path.exists(favicon_path):
-        return FileResponse(favicon_path, media_type="image/png")
+    fav_path = os.path.join(FRONTEND_DIR, "favicon.ico")
+    if os.path.exists(fav_path):
+        return FileResponse(fav_path)
     return Response(status_code=204)
 
 app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")), name="css")
@@ -141,8 +159,9 @@ app.mount("/img", StaticFiles(directory=IMG_DIR), name="img")
 @app.post("/api/admin/login")
 async def login_admin(req: AdminAuthRequest):
     """Valida a senha de administrador e retorna token de sessão."""
-    if req.password in VALID_ADMIN_KEYS:
-        return {"status": "autenticado", "token": req.password, "usuario": "Rafael Prattes (Admin)"}
+    admin_key = get_admin_secret_key()
+    if admin_key and req.password and hmac.compare_digest(req.password.strip(), admin_key):
+        return {"status": "autenticado", "token": req.password.strip(), "usuario": "Rafael Prattes (Admin)"}
     raise HTTPException(status_code=401, detail="Chave Mestre de Administrador Incorreta.")
 
 # ── 1. INGESTÃO PÚBLICA (ABERTO PARA O PÚBLICO RESPONDER) ─────

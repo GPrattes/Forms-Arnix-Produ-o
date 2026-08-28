@@ -15,10 +15,12 @@ import os
 import sys
 import io
 import csv
+import hmac
 from typing import List, Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, Response, Header, HTTPException, Depends, Request
+
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -133,8 +135,8 @@ async def test_get_route():
     return {"method": "GET", "status": "working", "message": "GET route is functional!"}
 
 # ── GUARDA DE SEGURANÇA DO ADMINISTRADOR ───────────────────────
-ADMIN_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY", "Prattes@Arnix2026!Master")
-VALID_ADMIN_KEYS = {ADMIN_SECRET_KEY, "Prattes@Arnix2026!Master", "arnix2026", "prattes2026"}
+def get_admin_secret_key() -> str:
+    return os.environ.get("ADMIN_SECRET_KEY", "").strip()
 
 def verify_admin_token(
     x_admin_key: Optional[str] = Header(None),
@@ -147,7 +149,8 @@ def verify_admin_token(
     elif authorization and authorization.startswith("Bearer "):
         token = authorization.split("Bearer ", 1)[1].strip()
 
-    if not token or token not in VALID_ADMIN_KEYS:
+    admin_key = get_admin_secret_key()
+    if not token or not admin_key or not hmac.compare_digest(token, admin_key):
         raise HTTPException(
             status_code=401,
             detail="Acesso Negado. Apenas o administrador autenticado da Prattes Technologies pode acessar os dados da pesquisa."
@@ -182,12 +185,35 @@ async def serve_sobre():
 
 @app.get("/fundador", include_in_schema=False)
 @app.get("/fundador.html", include_in_schema=False)
-@app.get("/gabriel-prattes", include_in_schema=False)
 async def serve_fundador():
-    fund_path = os.path.join(FRONTEND_DIR, "fundador.html")
-    if not os.path.exists(fund_path):
-        fund_path = os.path.join(BASE_DIR, "fundador.html")
-    return FileResponse(fund_path)
+    fundador_path = os.path.join(FRONTEND_DIR, "fundador.html")
+    if not os.path.exists(fundador_path):
+        fundador_path = os.path.join(BASE_DIR, "fundador.html")
+    return FileResponse(fundador_path)
+
+@app.get("/obrigado", include_in_schema=False)
+@app.get("/obrigado.html", include_in_schema=False)
+async def serve_obrigado():
+    obrigado_path = os.path.join(FRONTEND_DIR, "obrigado.html")
+    if not os.path.exists(obrigado_path):
+        obrigado_path = os.path.join(BASE_DIR, "obrigado.html")
+    return FileResponse(obrigado_path)
+
+@app.get("/politica-privacidade", include_in_schema=False)
+@app.get("/politica-privacidade.html", include_in_schema=False)
+async def serve_privacidade():
+    priv_path = os.path.join(FRONTEND_DIR, "politica-privacidade.html")
+    if not os.path.exists(priv_path):
+        priv_path = os.path.join(BASE_DIR, "politica-privacidade.html")
+    return FileResponse(priv_path)
+
+@app.get("/termos-uso", include_in_schema=False)
+@app.get("/termos-uso.html", include_in_schema=False)
+async def serve_termos():
+    termos_path = os.path.join(FRONTEND_DIR, "termos-uso.html")
+    if not os.path.exists(termos_path):
+        termos_path = os.path.join(BASE_DIR, "termos-uso.html")
+    return FileResponse(termos_path)
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def serve_favicon():
@@ -236,9 +262,11 @@ class AdminAuthRequest(BaseModel):
 @app.post("/admin/login")
 async def login_admin(req: AdminAuthRequest):
     """Valida a senha de administrador e retorna token de sessão."""
-    if req.password in VALID_ADMIN_KEYS:
-        return {"status": "autenticado", "token": req.password, "usuario": "Rafael Prattes (Admin)"}
+    admin_key = get_admin_secret_key()
+    if admin_key and req.password and hmac.compare_digest(req.password.strip(), admin_key):
+        return {"status": "autenticado", "token": req.password.strip(), "usuario": "Rafael Prattes (Admin)"}
     raise HTTPException(status_code=401, detail="Chave Mestre de Administrador Incorreta.")
+
 
 # ── ROTA DE DIAGNÓSTICO DO BANCO (🔒 EXCLUSIVO DO ADMINISTRADOR) ──
 @app.get("/api/debug", dependencies=[Depends(verify_admin_token)])

@@ -71,9 +71,8 @@ def enforce_rate_limit(request: Request):
     history.append(now)
     RATE_LIMIT_STORE[ip] = history
 
-# ── 2. AUTENTICAÇÃO COM TIMING-SAFE COMPARISON (ZERO-TRUST) ───
-ADMIN_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY", "Prattes@Arnix2026!Master")
-VALID_ADMIN_KEYS = [ADMIN_SECRET_KEY, "Prattes@Arnix2026!Master", "arnix2026", "prattes2026"]
+def get_admin_secret_key() -> str:
+    return os.environ.get("ADMIN_SECRET_KEY", "").strip()
 
 def verify_admin(
     x_admin_key: Optional[str] = Header(None),
@@ -88,15 +87,14 @@ def verify_admin(
     if not token:
         raise HTTPException(status_code=401, detail="Acesso Negado. Token de administrador não fornecido.")
 
-    # Comparação criptográfica segura contra ataques de timing
-    is_valid = any(hmac.compare_digest(token.lower(), vk.lower()) for vk in VALID_ADMIN_KEYS)
-    
-    if not is_valid:
+    admin_key = get_admin_secret_key()
+    if not admin_key or not hmac.compare_digest(token, admin_key):
         raise HTTPException(
             status_code=401,
             detail="Acesso Negado. Apenas o administrador autenticado da Prattes Technologies pode acessar os dados da pesquisa."
         )
     return True
+
 
 class RespostaSurvey(BaseModel):
     id: Optional[str] = None

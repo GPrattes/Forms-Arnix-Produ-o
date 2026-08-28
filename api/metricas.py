@@ -28,8 +28,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ADMIN_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY", "Prattes@Arnix2026!Master")
-VALID_ADMIN_KEYS = {ADMIN_SECRET_KEY, "Prattes@Arnix2026!Master", "arnix2026", "prattes2026"}
+import hmac
+
+def get_admin_secret_key() -> str:
+    return os.environ.get("ADMIN_SECRET_KEY", "").strip()
 
 def verify_admin(
     x_admin_key: Optional[str] = Header(None),
@@ -41,9 +43,14 @@ def verify_admin(
     elif authorization and authorization.startswith("Bearer "):
         token = authorization.split("Bearer ", 1)[1].strip()
 
-    if not token or token not in VALID_ADMIN_KEYS:
-        raise HTTPException(status_code=401, detail="Acesso Negado.")
+    admin_key = get_admin_secret_key()
+    if not token or not admin_key or not hmac.compare_digest(token, admin_key):
+        raise HTTPException(
+            status_code=401,
+            detail="Acesso Negado. Autenticação de administrador obrigatória."
+        )
     return True
+
 
 @app.get("/")
 @app.get("/api/metricas")
