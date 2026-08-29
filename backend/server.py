@@ -88,11 +88,16 @@ app.add_middleware(
 def get_admin_secret_key() -> str:
     candidates = [
         "ADMIN_SECRET_KEY",
+        "CHAVE_SECRETA_DO_ADMINISTRADOR",
+        "CHAVE_SECRETA_DO_ADMINISTR",
+        "CHAVE_SECRETA_ADMIN",
+        "CHAVE_SECRETA",
+        "CHAVE_ADMINISTRADOR",
+        "CHAVE_ADMIN",
         "ADMIN_KEY",
         "ADMIN_PASSWORD",
         "SECRET_KEY",
         "SENHA_ADMIN",
-        "CHAVE_ADMIN",
         "ADMIN_TOKEN",
         "AUTH_KEY"
     ]
@@ -103,7 +108,18 @@ def get_admin_secret_key() -> str:
                 val = val[1:-1].strip()
             if val:
                 return val
+
+    for k, v in os.environ.items():
+        k_upper = k.upper()
+        if any(w in k_upper for w in ["CHAVE_SECRETA", "ADMIN_SECRET", "ADMIN_KEY", "SENHA_ADMIN"]) and not any(p in k_upper for p in ["POSTGRES", "DATABASE", "URL", "PORT", "USER"]):
+            val = str(v).strip()
+            if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
+                val = val[1:-1].strip()
+            if val:
+                return val
+
     return ""
+
 
 def verify_admin_token(
     x_admin_key: Optional[str] = Header(None),
